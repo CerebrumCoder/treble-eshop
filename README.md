@@ -1,12 +1,14 @@
 Link PWS Tugas 2:\
-https://neal-guarddin-trebleeshop.pbp.cs.ui.ac.id/\
+https://neal-guarddin-trebleeshop.pbp.cs.ui.ac.id/ \
 Link Github Tugas 2:\
 https://github.com/CerebrumCoder/treble-eshop
 
 Jawaban pertanyaan:
-1. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
+1. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!\
+Secara garis besar step-by-step implementasinya seperti prosedur dari tutorial, mulai dari tutorial 0 sampai tutorial 1. Akan tetapi, beberapa hal seperti nama direktori utama, penggunaan SCHEMA menjadi tugas_individu, pembuatan models.py, selalu mengubah dan menambah baris kode dengan bantuan makemigrations serta migrate, dan pembuatan unit test itu berbeda karena menyesuaikan dengan yang kita butuhkan pada proyek ini. Contohnya membuat model pada aplikasi main dengan nama Product dan ada atribut wajibnya. Otomatis dalam pembuatan Unit Test juga menyesuaikan dengan semua itu. Serta setiap adanya perubahan perlu untuk memanggil command makemigrations dan migrate.
 
-2. Buatlah bagan yang berisi request client ke web aplikasi berbasis Django beserta responnya dan jelaskan pada bagan tersebut kaitan antara urls.py, views.py, models.py, dan berkas html
+2. Buatlah bagan yang berisi request client ke web aplikasi berbasis Django beserta responnya dan jelaskan pada bagan tersebut kaitan antara urls.py, views.py, models.py, dan berkas html\
+![alt text](<Django MVT Architecture.png>)
 
 3. Jelaskan peran settings.py dalam proyek Django!\
 settings.py dalam Django memegang peran krusial sebagai pusat kendali utama dalam sebuah proyek. Anggap sebagai "otak" dari web aplikasi kita.
@@ -16,8 +18,7 @@ Tanpa file ini, kita tidak akan tahu:
     - Aplikasi mana saja yang menjadi bagian dari proyek
     - Cara mengamankan aplikasi dengan SECRET_KEY dan ALLOWED_HOSTS
     - Cara menangani file statis Template seperti CSS dan JavaScript
-    - Apakah proyek web aplikasi sedang berjalan dalam mode pengembangan (banyak info error ketika DEBUG diset jadi TRUE) atau mode produksi (terkunci
-dan efisien)
+    - Apakah proyek web aplikasi sedang berjalan dalam mode pengembangan (banyak info error ketika DEBUG diset jadi TRUE) atau mode produksi (terkunci dan efisien)
 
 4. Bagaimana cara kerja migrasi database di Django?\
 Secara sederhana, migrasi Django kerjanya mirip version control system (Git) untuk struktur database kita. Proses ini memastikan bahwa perubahan pada kode model (models.py) tercermin secara aman dan konsisten di dalam database yang sebenarnya. Analoginya seperti membangun rumah dengan arsitek dan tim konstruksi:
@@ -29,13 +30,13 @@ Secara sederhana, migrasi Django kerjanya mirip version control system (Git) unt
     **Langkah 1: Kita mengubah models.py**\
     Kita membuka file models.py di web aplikasi dan melakukan perubahan/ Contohnya nambah line baris baru dalam models.py. Saat ini database kita belum berubah sama sekali. Kode python dan struktur database tidak sinkron.
 
-    **Langkah 2: Kita menjalankan python manage.py makemigrations**\
+    **Langkah 2: Kita menjalankan "python manage.py makemigrations"**\
     Django melakukan hal ini ketika command makemigrations dipanggil"
     1. Memeriksa perbedaan: Django membandingkan keadaan models.py saat ini dengan catatan file migrasi terakhir yang dibuat
     2. Mendeteksi perubahan: ternyata class di dalam models.py ada perubahan nambah baris kode nih
     3. Membuat cetak biru/blueprint: Django kemudian membuat sebuah file Python baru di dalam folder migrations/ web aplikasi. File ini bukan kode SQL. Tapi representasi perubahan dalam Python yang bersifat database-agnostik \
 
-    **Langkah 3: Kita menjalankan python manage.py migrate**\
+    **Langkah 3: Kita menjalankan "python manage.py migrate"**\
     Ketika ini dijalankan, Django melakukan tugas-tugas penting berikut:
     1. Django melihat dalam database kita dan memeriksa apakah ada perubahan atau tidak
     2. Membandingkan catatan: Django membandingkan catatan perubahan sebelum dan sesudah
