@@ -26,7 +26,7 @@ class MainTest(TestCase):
         
     def test_product_default_values(self):
         product = Product.objects.create(
-          name="Test Product",
+          name="JERSEY INDONESIA",
           price=100000,
           product_views=0,
           is_featured=False
@@ -34,6 +34,9 @@ class MainTest(TestCase):
         self.assertEqual(product.product_views, 0)
         self.assertFalse(product.is_featured)
         self.assertFalse(product.is_product_hot)
+
+        product.add_stock(10)
+        self.assertEqual(product.get_stock(), 10)
 
     def test_increment_views(self):
         product = Product.objects.create(

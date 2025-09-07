@@ -32,9 +32,13 @@ class Product(models.Model):
     thumbnail = models.URLField(blank=True, null=True)
     category = models.CharField(max_length=50)
     is_featured = models.BooleanField(default=False)
-
+    
     # Tambahan dari Neal
     product_views = models.PositiveIntegerField(default=0)
+    stock = models.IntegerField(default=0)
+    rating = models.IntegerField(default=0)
+    brand_name = models.CharField(max_length=255, default="Generic Brand")
+    quantity = models.IntegerField(default=0)
     
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # title = models.CharField(max_length=255)
@@ -56,3 +60,11 @@ class Product(models.Model):
     def increment_views(self):
         self.product_views += 1
         self.save()
+
+    def get_stock(self):
+        return self.stock
+    
+    def add_stock(self, amount):
+        if amount > 0:
+            self.stock += amount
+            self.save()
