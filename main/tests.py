@@ -34,7 +34,7 @@ class MainTest(TestCase):
         self.assertEqual(product.product_views, 0)
         self.assertFalse(product.is_featured)
         self.assertFalse(product.is_product_hot)
-
+        
         product.add_stock(10)
         self.assertEqual(product.get_stock(), 10)
 
@@ -55,7 +55,7 @@ class MainTest(TestCase):
           name="Product with 20 views",
           price=100000,
           product_views=20,
-          is_featured=False
+          is_featured=False,
         )
         self.assertFalse(product_20.is_product_hot)
 

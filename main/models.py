@@ -15,9 +15,9 @@ from django.db import models
 
 class Product(models.Model):
     # CATEGORY_CHOICES = [
-    #     ('transfer', 'Transfer'),
-    #     ('update', 'Update'),
-    #     ('exclusive', 'Exclusive'),
+    #     ('shoes', 'Shoes'),
+    #     ('jersey', 'Jersey'),
+    #     ('brand', 'Brand'),
     #     ('match', 'Match'),
     #     ('rumor', 'Rumor'),
     #     ('analysis', 'Analysis'),
