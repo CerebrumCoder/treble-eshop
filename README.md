@@ -3,6 +3,9 @@ https://neal-guarddin-trebleeshop.pbp.cs.ui.ac.id/ \
 Link Github Tugas 2:\
 https://github.com/CerebrumCoder/treble-eshop
 
+
+**Tugas 2: 8 September 2025**
+
 Jawaban pertanyaan:
 1. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!\
 Secara garis besar, step-by-step implementasinya mirip prosedur dari tutorial. Mulai dari tutorial 0 sampai tutorial 1. Akan tetapi, banyak perubahan yang dilakukan agar sesuai dengan kebutuhan proyek ini, seperti nama direktori utama, SCHEMA di-set menjadi tugas_individu, pembuatan models.py, selalu mengubah dan menambah baris kode models.py dengan bantuan makemigrations serta migrate, dan pembuatan unit test. Contoh lainnya, membuat model pada aplikasi main dengan nama Product dan ada atribut wajibnya serta method yang diperlukan. Otomatis dalam pembuatan Unit Test juga menyesuaikan dengan yang sudah didefinisikan pada class Product. Serta setiap adanya perubahan pada models.py, perlu memanggil command makemigrations dan migrate untuk memberitahu perubahan kepada Django. Hal ini dapat dilihat perubahan signifikannya pada models.py, tests.py, .env.prod.
@@ -51,4 +54,57 @@ Bagi seorang pemula, Django mengurangi beban kognitif dan menyediakan jalur yang
 
 
 6. Apakah ada feedback untuk asisten dosen tutorial 1 yang telah kamu kerjakan sebelumnya? \
-Tidak ada saya bisa memahami penjelasan Django dengan baik. Akhirnya tidak perlu melihat ke sumber lain karena cukup dari website PBP bisa mengerti sepenuhnya. 
+Tidak ada saya bisa memahami penjelasan Django dengan baik. Akhirnya tidak perlu melihat ke sumber lain karena cukup dari website PBP bisa mengerti sepenuhnya.
+
+
+
+**Tugas 3: 13 September 2025**
+1. Jelaskan mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform? \
+Data delivery adalah cara backend “mengemas & mengirim” data ke pemakai (web, mobile, service lain) dengan format, performa, dan jaminan yang tepat. 
+    - Alasannya karena pemisahan tanggung jawab (decoupling). Frontend tidak langsung ke database. Data disajikan lewat kontrak stabil (HTML/JSON/GraphQL) sehingga UI bisa berkembang tanpa mengubah skema DB terus-terusan
+    - Keamanan & kontrol akses. Validasi, autentikasi, otorisasi, rate limit, dan audit log dilakukan di lapisan delivery, bukan di UI atau DB
+    - Performa & skalabilitas. Pagination, filtering, shaping payload, caching, kompresi, dan CDN menurunkan beban DB & latensi
+
+2. Menurutmu, mana yang lebih baik antara XML dan JSON? Mengapa JSON lebih populer dibandingkan XML? \
+JSON lebih baik. Hal ini dikarenakan ergonomis untuk developer, ringkas & cepat, ekosistem API modern, lebih mudah di-browser dan mobile. Integrasi di frontend simpel, di backend juga generik. Biasanya lebih aman “by default”. Parser JSON jarang kena penyakit klasik XML yaitu XXE.
+
+3. Jelaskan fungsi dari method is_valid() pada form Django dan mengapa kita membutuhkan method tersebut? \
+Method is_valid() adalah method yang seperti "cek data". Ketika dipanggil, maka Django akan memeriksa semua input, mengonversi ke tipe Python yang benar, dan menyiapkan error kalau ada salah. Kita membutuhkan method tersebut karena lebih aman, nyaman bagi developer dalam membuat web aplikasinya, dan pesan error otomatis muncul (sehingga mudah debug untuk menyelesaikan masalahnya).
+
+4. Mengapa kita membutuhkan csrf_token saat membuat form di Django? Apa yang dapat terjadi jika kita tidak menambahkan csrf_token pada form Django? Bagaimana hal tersebut dapat dimanfaatkan oleh penyerang? \
+Karena csrf_token itu mirip pelindung atau tanda pengenal sekali pakai yang membuktikan: “request ini benar-benar berasal dari form/halaman yang kamu kirim dari sitemu sendiri, bukan dari situs orang lain". Yang terjadi jika tidak menambahkan csrf_token adalah form tidak akan jalan dan web menjadi rawan dibajak sehingga mudah dieksploitasi.\
+Skenario klasik penyerang memanfaatkan celah ini yaitu:
+    1. User lagi login di situs yang kita buat (cookie sesi masih aktif).
+    2. User iseng buka situs lain (mis. blog/iklan) yang ternyata dibuat penyerang.
+    3. Di halaman itu, penyerang nyuruh browser user ngirim request ke situs yang kita buat. Contohnya transfer atau/mengubah email tanpa sepengetahuan user (bisa lewat form yang otomatis ke-submit dlsb.).
+    4. Browser otomatis bawa cookie login user saat nyentuh domain situs yang kita buat.
+
+    Kalau **TIDAK** ada csrf_token:
+Server mengira request itu asli dari situsmu, karena cookie valid → aksi berbahaya jalan (email berubah, uang terkirim, data kehapus), padahal korban nggak pernah klik apa-apa.
+
+    Kalau **ADA** csrf_token:
+Request dari halaman penyerang nggak punya token rahasia yang benar (mereka nggak bisa bacanya karena Same-Origin Policy) → server nolak (403). Aksi jahat gagal.
+
+    Contoh sehari-hari yang fatal adalah Media sosial yang auto follow/like/post.
+Lagi login di sosmed, tiba-tiba buka halaman jebakan.
+Tanpa CSRF: akun kita bisa otomatis follow akun tertentu atau kirim status spam.
+Dengan CSRF: server nolak karena tidak ada token yang sah.
+
+5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).\
+Secara garis besar, step-by-step implementasinya mirip prosedur dari tutorial. Akan tetapi, banyak perubahan yang dilakukan agar sesuai dengan kebutuhan proyek ini, seperti pembuatan models.py sesuai atribut yang diminta dalam tugas, membuat forms.py untuk input data, membuat views.py untuk menampilkan dan menambahkan produk, membuat create_product.html, product_detail.html, dan base.html, serta menambahkan URL Routing di dalam main/urls.py dengan method yang sudah dibuat dalam views.py. 
+
+6. Apakah ada feedback untuk asdos di tutorial 2 yang sudah kalian kerjakan? \
+Tidak ada saya bisa memahami penjelasan Django dengan baik. Akhirnya tidak perlu melihat ke sumber lain karena cukup dari website PBP bisa mengerti sepenuhnya.
+
+Hasil mengakses 4 URL untuk melihat data via XML dan JSON:
+- **Semua Data Produk via XML**
+![alt text](All-Data-XML.png)
+
+- **Semua Data Produk via JSON**
+![alt text](All-Data-JSON.png)
+
+- **Ambil Data Produk berdasarkan ID XML**
+![alt text](XML-Data-ID.png)
+
+- **Ambil Data Produk berdasarkan ID JSON**
+![alt text](JSON-Data-ID.png)  

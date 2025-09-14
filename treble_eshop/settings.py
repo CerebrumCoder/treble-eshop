@@ -32,6 +32,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "neal-guarddin-trebleeshop.pbp.cs.ui.ac.id"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://neal-guarddin-trebleeshop.pbp.cs.ui.ac.id"
+]
 
 # Application definition
 
@@ -60,7 +63,7 @@ ROOT_URLCONF = 'treble_eshop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'], # Tambahkan konten baris ini
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
