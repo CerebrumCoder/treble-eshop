@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <h1>Treble Eshop: Game On, Style On</h1>
 
-<h4 style="margin-bottom:1px;">Nama Aplikasi: </h4>
-<p>{{ nama_aplikasi }}</p>
 <h4 style="margin-bottom:1px;">NPM: </h4>
 <p>{{ npm }}</p>
 <h4 style="margin-bottom:1px;">Name: </h4>
@@ -15,7 +14,24 @@
   <button>+ Add Product</button>
 </a>
 
+<!-- Untuk mengarah ke URL secara dinamis berdasarkan app_name dan name 
+ yang sudah didefinisikan di urls.py. -->
+<a href="{% url 'main:logout' %}">
+  <button>Logout</button>
+</a>
+
+<h5>Sesi terakhir login: {{ last_login }}</h5>
+
+<!-- Divider -->
 <hr>
+
+<a href="?filter=all">
+    <button type="button">All Products</button>
+</a>
+<a href="?filter=my">
+    <button type="button">My Products</button>
+</a> 
+
 
 {% if not product_list %}
 <p>No product added yet.</p>

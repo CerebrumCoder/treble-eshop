@@ -2,6 +2,9 @@ from datetime import datetime, timezone
 import uuid
 from django.db import models
 
+# Menghubungkan setiap objek Product dengan user yang membuatnya
+from django.contrib.auth.models import User
+
 # Ingat setiap mau ada perubahan di models.py, harus migrate dan makemigrations
 # IMPORTANT!!!
 # Setiap kali kamu melakukan perubahan pada model, seperti menambahkan atau 
@@ -15,6 +18,14 @@ from django.db import models
 # yang belum diaplikasikan ke dalam basis data.
 
 class Product(models.Model):
+
+    # Kode di bawah berfungsi untuk menghubungkan satu produk dengan satu user melalui sebuah relationship
+    # Setiap news dapat terasosiasi dengan seorang user (many-to-one relationship)
+    # null=True memungkinkan news yang sudah ada sebelumnya tetap valid tanpa harus memiliki user
+    # on_delete=models.CASCADE berarti jika user dihapus, semua news milik user tersebut juga akan ikut terhapus
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    
     CATEGORY_CHOICES = [
         ('shoes', 'Shoes'),
         ('jersey', 'Jersey'),

@@ -23,4 +23,10 @@
 <p><b>This product is hot!🔥</b></p>
 {% endif %}
 
+{% if product.user %}
+    <p>Author: {{ product.user.username }}</p>
+{% else %}
+    <p>Author: Anonymous</p>
+{% endif %}
+
 {% endblock content %}

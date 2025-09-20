@@ -108,3 +108,97 @@ Hasil mengakses 4 URL untuk melihat data via XML dan JSON:
 
 - **Ambil Data Produk berdasarkan ID JSON**
 ![alt text](JSON-Data-ID.png)  
+
+
+
+**Tugas 4: 18 September 2025**
+1. Apa itu Django AuthenticationForm? Jelaskan juga kelebihan dan kekurangannya.\
+**Django AuthenticationForm** adalah class fitur bawaan dari Django yang menyediakan sistem formulir untuk authentikasi pengguna/user seperti login dan registrasi.
+
+    Kelebihan Django AuthenticationForm:
+    - **Mudah digunakan**. Django Authentication Form sangat mudah diintegrasikan ke dalam proyek Django. Kita hanya perlu mengimpornya dan menggunakannya dalam tampilan (view) dan template proyek
+    - **Keamanan terjamin**. Django dibangun dengan mempertimbangkan keamanan. AuthenticationForm secara otomatis bisa menangani banyak aspek keamanan, contohnya perlindungan terhadap serangan Cross-Site Request Forgery (CSRF) dan hashing kata sandi yang aman
+    - **Tersedia fitur otomatis**. Formulir ini sudah menyediakan validasi otomatis untuk input pengguna, seperti memeriksa apakah username dan password sudah diisi
+
+    Kekurangan Django AuthenticationForm:
+    - **Kurang Fleksibel untuk Kebutuhan Spesifik**. Kalo kita membutuhkan authentikasi yang lebih spesifik atau kompleks, maka Django AuthenticationForm kurang fleksibel untuk hal itu.
+    - **Terlalu Banyak Fitur yang Tidak Dibutuhkan**. Untuk aplikasi yang sangat sederhana dan hanya membutuhkan authentikasi dasar, fitur-fitur lengkap dari AuthenticationForm mungkin terasa berlebihan dan menambahkan kompleksitas yang tidak perlu
+    - **Membutuhkan Pemahaman Dasar Django**. Meskipun mudah digunakan, kita tetap perlu memiliki pemahaman dasar tentang cara kerja Django, termasuk views, forms, dan templates, untuk bisa menggunakannya dengan efektif
+
+2. Apa perbedaan antara autentikasi dan otorisasi? Bagaimana Django mengimplementasikan kedua konsep tersebut?\
+    **Authentikasi** adalah proses verifikasi identitas pengguna. Contohnya, memasukkan username dan password untuk login ke sebuah situs web, menggunakan sidik jari atau PIN untuk membuka smartphone, atau memindai scan wajah untuk verifikasi identitas. Tujuannya untuk memastikan bahwa pengguna yang mencoba mengakses sistem adalah pengguna yang sah dan terdaftar. Jika autentikasi berhasil, sistem tahu siapa pengguna tersebut
+
+    **Otorisasi** adalah proses menentukan hak akses atau izin yang dimiliki oleh pengguna yang sudah terautentikasi terhadap sumber daya tertentu. Contohnya, seorang pengguna admin dapat menghapus data pengguna lain, sementara pengguna biasa hanya dapat melihat dan mengedit profilnya sendiri. Tujuannya untuk mengontrol akses ke fitur, data, atau fungsi berdasarkan peran atau izin yang diberikan kepada pengguna
+
+    Cara implementasinya yaitu:
+    1. **User Model**\
+    Django memiliki model User bawaan (django.contrib.auth.models.User) yang menyimpan informasi dasar pengguna seperti username, password (yang di-hash dengan aman), email, first name, last name, dan status aktif.
+    2. **Authentication Backends**\
+    Django mendukung multiple authentication backends. Ini berarti kita bisa mengautentikasi pengguna engga hanya berdasarkan username dan password, tetapi juga melalui metode lain (misalnya, email dan password, atau integrasi dengan LDAP/OAuth melalui third-party apps).
+    3. **Authentication Forms & Views**\
+    Django menyediakan AuthenticationForm (seperti yang dijelaskan sebelumnya) dan views siap pakai (LoginView, LogoutView) yang memudahkan kita untuk membuat fungsionalitas login dan logout tanpa harus menulis banyak kode
+    4. **Password Hashing**\
+    Django secara otomatis meng-hash password menggunakan algoritma yang kuat (seperti PBKDF2) untuk melindungi data dari serangan
+    5. **Session Management**\
+    Setelah pengguna berhasil terautentikasi, Django membuat session yang menyimpan informasi bahwa pengguna tersebut sudah login. Session ini kemudian digunakan untuk melacak pengguna di setiap permintaan berikutnya tanpa perlu autentikasi ulang
+
+
+3. Apa saja kelebihan dan kekurangan session dan cookies dalam konteks menyimpan state di aplikasi web?\
+    Kelebihan cookies:
+    - **Statelessness Ditingkatkan**: Memungkinkan server untuk tetap stateless karena semua data yang diperlukan untuk mengidentifikasi atau mengautentikasi pengguna dikirimkan kembali oleh browser di setiap permintaan.
+    - **Skalabilitas**: Karena data disimpan di sisi klien, ini dapat mengurangi beban pada server, yang membantu skalabilitas aplikasi.
+    - **Dapat Digunakan untuk Personalisasi**: Sangat baik untuk menyimpan preferensi pengguna (misalnya, tema, bahasa, pengaturan tampilan) yang tidak perlu diakses oleh server setiap saat.
+    - **Dapat Ditetapkan Expiry Date**: Cookies dapat memiliki expiry date (tanggal kadaluarsa), sehingga bisa tetap ada di browser pengguna bahkan setelah browser ditutup
+
+    Kekurangan cookies:
+    - **Ukuran terbatas**: Ukuran setiap cookie umumnya sangat kecil (sekitar 4KB), dan jumlah cookies per domain juga terbatas. Ini tidak cocok untuk menyimpan data yang besar
+    - **Keamanan (Client-Side Storage)**: Data yang disimpan di cookies (terutama yang tidak terenkripsi) rentan terhadap inspeksi dan manipulasi oleh pengguna. 
+    - **Mengirim Data di Setiap Permintaan**: Setiap kali browser membuat permintaan ke server yang cookienya berlaku, cookie tersebut akan dikirimkan. Jika ada banyak cookies atau cookies berukuran besar, ini bisa menambah overhead pada setiap permintaan dan memengaruhi kinerja
+
+    Kelebihan session:
+    - **Keamanan Lebih Baik (Server-Side Storage)**: Data session yang sebenarnya disimpan di server, sehingga tidak bisa diakses atau dimanipulasi langsung oleh pengguna di browser. Ini ideal untuk menyimpan data rahasia dan sensitif
+    - **Ukuran Data Tidak Terbatas**:
+    Tidak ada batasan ukuran data session selain kapasitas penyimpanan server kita
+    - **Tidak Dikirim di Setiap Permintaan**: Hanya Session ID (yang ukurannya kecil) yang dikirim di setiap permintaan HTTP, bukan seluruh data session
+    - **Manajemen Mudah**: Server dapat dengan mudah mengelola dan mengakhiri session (misalnya, setelah timeout atau logout)
+
+    Kekurangan session:
+    - **Beban Server**: Data session disimpan di server, yang berarti server harus mengelola dan menyimpan data untuk setiap pengguna aktif. Ini dapat meningkatkan penggunaan memori dan storage server, terutama pada aplikasi dengan banyak pengguna bersamaan
+    - **Masalah Skalabilitas (Horizontal Scaling)**: Jika kita menjalankan beberapa instance server (misalnya, di balik load balancer), session yang disimpan secara lokal di satu server tidak akan tersedia di server lain.
+    - **SPOF (Single Point of Failure)**: Jika session storage utama mengalami masalah, semua session bisa hilang atau tidak dapat diakses
+
+4. Apakah penggunaan cookies aman secara default dalam pengembangan web, atau apakah ada risiko potensial yang harus diwaspadai? Bagaimana Django menangani hal tersebut?\
+    Penggunaan cookies secara default **tidak sepenuhnya aman** dalam pengembangan web dan ada beberapa risiko potensial yang harus diwaspadai. Karena  keamanan cookies sangat bergantung pada bagaimana cookies dikonfigurasi dan bagaimana web aplikasi dibangun.
+
+    Risiko potensial cookies:
+    1. **Cross-Site Scripting (XSS):**\
+    Risiko: Jika web aplikasi kita rentan terhadap serangan XSS, penyerang dapat menyuntikkan skrip berbahaya ke halaman web yang kita buat. Skrip ini kemudian dapat membaca dan mencuri cookies pengguna, termasuk session cookies yang digunakan untuk otentikasi
+    2. **Cross-Site Request Forgery (CSRF)**\
+    Risiko: Penyerang dapat membuat situs web palsu yang mengirimkan permintaan ke situs kita. Jika pengguna yang login mengunjungi situs palsu tersebut, browser mereka akan secara otomatis menyertakan cookies autentikasi yang sah dengan permintaan tersebut.
+    3. **Session Hijacking**\
+    Risiko: Jika cookies dikirim melalui koneksi HTTP yang tidak terenkripsi, penyerang/hacker di tengah jaringan (Man-in-the-Middle) dapat mencegat dan membaca cookies, termasuk session cookies milik pengguna
+
+    Cara Django menangani risiko tersebut:
+    1. **Session Cookies**\
+    Secara default, Django menggunakan session cookies untuk mengelola session pengguna. Berarti, data session yang sebenarnya disimpan di sisi server (biasanya dalam database, cache, atau file), dan browser hanya menyimpan Session ID yang unik. Ini mencegah data sensitif terekspos ke klien
+    2. **HttpOnly flag**\
+    Secara default, session cookies Django diatur dengan flag HttpOnly. Ini berarti cookie tidak dapat diakses oleh client-side scripts JavaScript. Ini adalah pertahanan yang sangat efektif terhadap serangan XSS, karena bahkan jika penyerang berhasil menyuntikkan skrip, mereka tidak dapat mencuri session cookie
+    3. **Secure Flag**\
+    Django memungkinkan kita untuk mengatur cookie dengan flag Secure (melalui pengaturan/settings.py SESSION_COOKIE_SECURE = True). Ketika flag ini diaktifkan, browser hanya akan mengirimkan cookie melalui koneksi HTTPS yang terenkripsi. Ini melindungi cookies dari dicegat oleh penyerang Man-in-the-Middle. Ini **sangat direkomendasikan** untuk diaktifkan di lingkungan produksi. 
+    4. **CSRF Protection**\
+    Django memiliki perlindungan CSRF bawaan yang kuat. Ini bekerja dengan menyertakan token CSRF unik di setiap formulir POST. Ketika formulir dikirimkan, Django membandingkan token di formulir dengan token di cookie (atau session). Jika tidak cocok, permintaan akan ditolak. Ini mencegah serangan CSRF. Ini bisa diaktifkan dengan menambahkan {% csrf_token %} di file .html formulir dan pastikan sudah di set "CSRF_TRUSTED_ORIGINS" di dalam settings.py
+
+5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).\
+Tidak ada, saya bisa memahami penjelasan Django dengan baik. Akhirnya tidak perlu melihat ke sumber lain karena cukup dari website PBP bisa mengerti sepenuhnya. Adapun penjabarannya yaitu, tutorial menggunakan model sederhana, sedangkan saya sudah memperluas model dengan atribut dan method tambahan untuk mendukung fitur yang lebih kompleks. views.py dan tests.py sudah menyesuaikan dengan model proyek ini di models.py
+
+
+6. Membuat 2 akun dan masing-masing 3 dummy data menggunakan model yang telah dibuatnya\
+**User 1:**
+![alt text](User-1.png)
+**User 2:**
+![alt text](User-2.png)
+
+
+
+
+
