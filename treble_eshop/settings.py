@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "neal-guarddin-trebleeshop.pbp.cs.ui.ac.id"]
 
+# Ngasih tahu kalo form yang ada di Django ini itu aman. Jadi, kalo ada request yang masuk ke server kita,
+# terus request itu bukan dari website kita, maka request itu akan ditolak.
 CSRF_TRUSTED_ORIGINS = [
     "https://neal-guarddin-trebleeshop.pbp.cs.ui.ac.id"
 ]

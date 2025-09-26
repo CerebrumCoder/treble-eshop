@@ -51,6 +51,20 @@ def show_main(request):
     # Fungsi ini akan merender template main.html
     return render(request, 'main.html', context)
 
+# Buatin form untuk mobil baru
+# Bedanya <a> dan <button>
+# def create_car(request):
+#     form = CarForm(request.POST or None)
+
+#     if form.is_valid() and request.method == "POST":
+#         new_car = Car.objects.create(
+#             name = form.cleaned_data["name"],
+#             brand = form.cleaned_data["brand"],
+#             stock = form.cleaned_data["stock"],
+#         )
+
+#     return render(request, "index.html")
+
 # Untuk tambah produk baru
 def create_product(request):
     form = ProductForm(request.POST or None)
@@ -179,3 +193,24 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+
+# Fungsi untuk menambahkan fitur edit product pada web aplikasi
+def edit_product(request, id):
+    products = get_object_or_404(Product, pk=id)
+    form = ProductForm(request.POST or None, instance=products)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_main')
+    
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'edit_product.html', context)
+
+# Fungsi untuk menambahkan fitur hapus product pada web aplikasi
+def delete_product(request, id):
+    product = get_object_or_404(Product, pk=id)
+    product.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))

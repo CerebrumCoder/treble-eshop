@@ -83,3 +83,11 @@ class Product(models.Model):
     @property
     def price_in_rupiah(self):
         return f"Rp{self.price:,}".replace(',', '.')
+
+# Demo di tugas 2
+# class Car(models.Model):
+#     name = models.CharField(max_length=255)
+#     brand = models.CharField(max_length=255)
+#     stock = models.IntegerField(default=0)
+
+    

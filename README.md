@@ -198,7 +198,85 @@ Tidak ada, saya bisa memahami penjelasan Django dengan baik. Akhirnya tidak perl
 **User 2:**
 ![alt text](User-2.png)
 
+**Tugas 5: 25 September 2025**
+1. Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut!\
+Terdapat beberapa CSS Selector urutan prioritas tertinggi ke terendah:
+    1. **Aturan !important**\
+    Dengan adanya !important, pada sebuah properti CSS, aturan itu menunjukkan bahwa mengalahkan semua aturan lainnya, terlepas dari spesifitas selectornya
+    2. **Inline style (gaya yang ditulis langsung di atribut style elemen HTML)**\
+    Ini maksudnya memberikan style secara inline pada sebuah element yang ada di \<tag> html. Contohnya \<p id="intro" class="text" style="color: green;">Teks ini akan berwarna hijau.</p>
+    3. **ID Selector (contoh: #header)**\
+    Browser menghitung skor berdasarkan jenis selector yang digunakan:
+        - ID Selector (#): Mendapat skor tertinggi. Sangat spesifik karena ID seharusnya unik dalam satu halaman.
+        - Class (.), Attribute ([]), dan Pseudo-class (:): Memiliki skor di tingkat menengah. Anda bisa memiliki banyak elemen dengan class yang sama.
+        - Element (tag) dan Pseudo-element (::): Memiliki skor terendah. Ini adalah selector yang paling umum atau tidak spesifik.
+    4. **class Selector (.class), attribute selector ([type = "text]), dan Pseudo-class (:hover)**\
+    Jika dua selector memiliki skor spesifisitas yang sama persis, maka aturan yang didefinisikan paling akhir di dalam file CSS (atau yang dibaca terakhir oleh browser) adalah yang akan diterapkan. Contoh dalam kode CSS:\
+    ```
+    .highlight {
+        color: blue; /* Aturan ini akan kalah */
+    }
+    .highlight {
+        color: red;  /* Aturan ini akan MENANG karena ditulis setelahnya */
+    }
+    ```
+    5. Element Selector (div, p) dan Pseudo element (::before)
+    6. Urutan Kode (jika spesifisitasnya sama, aturan yang ditulis terakhir akan menang)
 
+2. Mengapa *responsive design* menjadi konsep yang penting dalam pengembangan aplikasi *web*? Berikan contoh aplikasi yang sudah dan belum menerapkan *responsive design*, serta jelaskan mengapa!\
+*Responsive design* adalah pendekatan desain web yang membuat tampilan situs bisa otomatis menyesuaikan diri dengan berbagai ukuran layar, dari desktop hingga smartphone.
+Hal ini sangat penting karena:
+    - **Pengalaman Pengguna (UX)**: membuat situs nyaman digunakan di semua perangkat, tanpa perlu zoom atau geser-geser.
+    - **SEO**: Google lebih menyukai dan memberi peringkat lebih tinggi pada situs yang ramah mobile (mobile-friendly)
+    - **Efisiensi**: Cukup kelola satu situs untuk semua perangkat, hemat waktu dan biaya\
+Contohnya:
+        - ✅ Sudah Responsif (Contoh: Google News): Di desktop, tampilannya multi-kolom. Di HP, otomatis berubah jadi satu kolom vertikal yang mudah di-scroll. Konten tetap sama, hanya tata letaknya yang menyesuaikan 
+        - ❌ Belum Responsif (Contoh: Situs lama): Di HP, seluruh halaman desktop hanya "dikecilkan" Akibatnya, tulisan jadi tidak terbaca dan tombol sulit ditekan, sehingga membuat pengunjung frustrasi dan meninggalkan situs
 
+3. Jelaskan perbedaan antara *margin*, *border*, dan *padding*, serta cara untuk mengimplementasikan ketiga hal tersebut!\
+Secara singkat, **padding** adalah ruang di dalam batas elemen, **border** adalah garis batas itu sendiri, dan **margin** adalah ruang di luar batas elemen yang mendorong elemen lain menjauh. Bayangkan sebuah elemen HTML (seperti teks atau gambar) adalah sebuah foto.
 
+    - **Content** (Konten): Ini adalah fotonya.
+    - **Padding**: Ruang kosong atau matting antara foto dan bingkai. Ruang ini mengambil warna latar belakang elemen.
+    - **Border**: Bingkai fotonya itu sendiri. Bingkai ini punya ketebalan, gaya (misalnya garis solid atau putus-putus), dan warna.
+    - **Margin**: Ruang kosong di dinding di luar bingkai foto, yang memberikan jarak antara bingkai foto ini dengan bingkai foto lainnya. Ruang ini selalu transparan.\
+Cara implementasinya, misal punya HTML elemen ini:
+    ```
+    <div class="kotak">Ini adalah konten di dalam kotak.</div>
+    ```
+    Lalu dalam sebuah file style.css:
+    ```
+    .kotak {
+    /* Padding: 20px di semua sisi (atas, kanan, bawah, kiri) */
+    padding: 20px;
+
+    /* Border: tebal 2px, gaya garis solid, warna hitam */
+    border: 2px solid black;
+
+    /* Margin: 30px di semua sisi, mendorong elemen lain sejauh 30px */
+    margin: 30px;
+
+    /* Properti tambahan agar mudah dilihat */
+    background-color: lightblue;
+    width: 250px;
+    }
+    ```
+
+4. Jelaskan konsep *flex box* dan *grid layout* beserta kegunaannya!\
+**Flexbox** adalah model tata letak untuk satu dimensi (baik sebagai baris atau kolom). Bayangkan Flexbox seperti mengatur buku di satu rak. Kita bisa mengatur buku-buku itu berjajar dari kiri ke kanan (baris) atau menumpuknya dari atas ke bawah (kolom), sedangkan **Grid** adalah model tata letak untuk dua dimensi (baris dan kolom secara bersamaan). Bayangkan Grid seperti lembar spreadsheet atau papan catur. Kita memiliki kontrol penuh atas baris dan kolom secara bersamaan. Keduanya digunakan untuk mengatur posisi dan perataan elemen di halaman web. 
+    **Kegunaan Flexbox (Flexible Box Layout):**
+    - Komponen kecil: sangat ideal untuk mengatur elemen di dalam sebuah komponen, seperti tombol di dalam form, item menu di navigation bar, atau konten di dalam sebuah kartu (card)
+    - Perataan (alignment): Paling mudah digunakan untuk memusatkan elemen secara vertikal dan horizontal
+    - Distribusi ruang: Hebat dalam mengatur agar elemen-elemen mengisi ruang yang tersedia secara merata atau diberi jarak yang sama di antara mereka
+
+    **Kegunaan Grid Layout:**
+    - Tata Letak Halaman Penuh: Sempurna untuk mengatur struktur utama halaman web, seperti area header, sidebar, konten utama, dan footer
+    - Layout Kompleks: Memungkinkan pembuatan desain yang rumit, asimetris, atau tumpang tindih yang sulit dicapai dengan Flexbox
+    - Galeri Gambar: Sangat baik untuk membuat galeri gambar yang presisi, di mana setiap gambar tersusun rapi dalam baris dan kolom
+
+5. Jelaskan bagaimana cara kamu mengimplementasikan *checklist* di atas secara *step-by-step* (bukan hanya sekadar mengikuti tutorial)!\
+    - Semua bermula dari implementasi fungsi untuk menghapus dan mengedit Product. Mirip seperti implementasi pada tutorial, yang membedakan di bagian pemanggilan kelas sesuai kebutuhan yaitu Product dan ProductForm. 
+    - Setelah itu membuat file 'edit_product.html' pada subdirektori main/templates. Dan urls.py membantu untuk me-render dan redirect ke halaman main.html serta edit_product.html. Lalu menambahkan tombol "Edit Product" ke dalam main.html
+    - Selanjutnya menambahkan fitur hapus Product pada web aplikasi. Lalu integrasi dengan views.py dan urls.py. Setelah itu tambahkan tombol yang menghapus sebuah product di main.html dengan bantuan idnya
+    - 
 
