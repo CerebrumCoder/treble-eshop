@@ -1,22 +1,80 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
+{% block meta %}
+<title>Create Product - Treble Eshop</title>
+{% endblock meta %}
+
 {% block content %}
-<h1>Add Product</h1>
+<div class="bg-gray-50 w-full min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
 
-<form method="POST">
-  {% csrf_token %}
-  <table>
-    {{ form.as_table }}
-    <tr>
-      <td></td>
-      <td>
-        <input type="submit" value="Add Product" />
-      </td>
-    </tr>
-  </table>
-</form>
+    <!-- Back -->
+    <div class="mb-6">
+      <a href="{% url 'main:show_main' %}" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+        ← Back to Products
+      </a>
+    </div>
 
-<!-- <button> itu untuk trigger action
-<a> itu untuk navigasi -->
-<p><a href="{% url 'main:show_main' %}"><button>← Back to Main Page</button></a></p>
+    <!-- Card -->
+    <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 form-style">
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Add Product</h1>
+        <p class="text-gray-600">Isi detail produk di bawah ini.</p>
+      </div>
 
+      <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              {{ field.label }}
+            </label>
+
+            <div class="w-full">
+              {{ field }}
+            </div>
+
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text }}</p>
+            {% endif %}
+
+            {% for error in field.errors %}
+              <p class="error">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          <a href="{% url 'main:show_main' %}"
+             class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-colors text-center">
+            Cancel
+          </a>
+          <button type="submit"
+                  class="order-1 sm:order-2 flex-1 bg-[--color-button] text-white px-6 py-3 rounded-md font-medium hover:bg-[--color-button-hover] transition-colors">
+            Add Product
+          </button>
+        </div>
+      </form>
+
+      <!-- (Opsional) preview untuk field file bernama "thumbnail" -->
+      <img id="thumbPreview" class="mt-4 hidden h-40 w-full rounded-md border border-gray-200 bg-gray-50 p-2 object-contain" />
+    </div>
+  </div>
+</div>
+
+<script>
+  // Preview sederhana tanpa menyentuh tipe widget di template
+  (function () {
+    const input = document.querySelector('input[type="file"][name="thumbnail"]');
+    const preview = document.getElementById('thumbPreview');
+    if (input && preview) {
+      input.addEventListener('change', () => {
+        const [file] = input.files || [];
+        if (file) { preview.src = URL.createObjectURL(file); preview.classList.remove('hidden'); }
+        else { preview.src = ''; preview.classList.add('hidden'); }
+      });
+    }
+  })();
+</script>
 {% endblock %}

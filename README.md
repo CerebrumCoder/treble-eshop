@@ -274,9 +274,12 @@ Cara implementasinya, misal punya HTML elemen ini:
     - Layout Kompleks: Memungkinkan pembuatan desain yang rumit, asimetris, atau tumpang tindih yang sulit dicapai dengan Flexbox
     - Galeri Gambar: Sangat baik untuk membuat galeri gambar yang presisi, di mana setiap gambar tersusun rapi dalam baris dan kolom
 
-5. Jelaskan bagaimana cara kamu mengimplementasikan *checklist* di atas secara *step-by-step* (bukan hanya sekadar mengikuti tutorial)!\
+5. Jelaskan bagaimana cara kamu mengimplementasikan *checklist* di atas secara *step-by-step* (bukan hanya sekadar mengikuti tutorial)!
     - Semua bermula dari implementasi fungsi untuk menghapus dan mengedit Product. Mirip seperti implementasi pada tutorial, yang membedakan di bagian pemanggilan kelas sesuai kebutuhan yaitu Product dan ProductForm. 
     - Setelah itu membuat file 'edit_product.html' pada subdirektori main/templates. Dan urls.py membantu untuk me-render dan redirect ke halaman main.html serta edit_product.html. Lalu menambahkan tombol "Edit Product" ke dalam main.html
     - Selanjutnya menambahkan fitur hapus Product pada web aplikasi. Lalu integrasi dengan views.py dan urls.py. Setelah itu tambahkan tombol yang menghapus sebuah product di main.html dengan bantuan idnya
-    - 
+    - Lalu integrasi pembuatan styling pada login.html dengan guide tutorial dan docs tailwind
+    - Sama halnya dengan registrasi.html
+    - Lalu juga pembuatan styling untuk file edit_product.html, create_product.html, product_detail.html dengan bantuan tailwindcss dan ChatGPT untuk membantu pembuatan kerangka style websitenya
+    - Adapun jika ingin melihat detail lebih lanjutnya, bisa dilihat di file **Treble_Eshop_Implementation.pdf**. Ini merupakan bantuan generate GPT, karena ada banyak yang belum saya cover dalam penjelasan pertanyaan ini.
 

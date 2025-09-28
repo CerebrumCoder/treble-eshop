@@ -1,77 +1,315 @@
 {% extends 'base.html' %}
 {% block content %}
+{% include 'navbar.html' %}
 
-<h1>Treble Eshop: Game On, Style On</h1>
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+  <header class="mb-6">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Treble Eshop: Game On, Style On</h1>
+    <p class="text-gray-600">Welcome back, {{ name }} — NPM {{ npm }} • Class {{ class }}</p>
+  </header>
 
-<h4 style="margin-bottom:1px;">NPM: </h4>
-<p>{{ npm }}</p>
-<h4 style="margin-bottom:1px;">Name: </h4>
-<p>{{ name }}</p>
-<h4 style="margin-bottom:1px;">Class: </h4>
-<p>{{ class }}</p>
+  <!-- Filter Bar -->
+  <div class="mb-6 rounded-2xl bg-white ring-1 ring-gray-200 p-3">
+    <!-- mobile: 1 kolom (tombol di atas, last-login di bawah)
+        ≥sm: 2 kolom (tombol kiri melebar, last-login kanan) -->
+    <div class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+      
+      <!-- Wadah tombol -->
+      <div class="w-full">
+        <!-- Dua tombol = dua kolom sama lebar, full width -->
+        <div class="grid grid-cols-2 gap-2 w-full">
+          <a href="?filter=all"
+            class="inline-flex w-full justify-center items-center
+                    rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap
+                    ring-1 ring-gray-300 hover:bg-gray-50
+                    {% if request.GET.filter != 'my' %} bg-[--color-button]/10 text-[--color-button] ring-[--color-button]/30 {% endif %}">
+            All Products
+          </a>
 
-<!-- <button> itu untuk trigger action
-<a> itu untuk navigasi -->
-<a href="{% url 'main:create_product' %}">
-  <button>+ Add Product</button>
-</a>
+          <a href="?filter=my"
+            class="inline-flex w-full justify-center items-center
+                    rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap
+                    ring-1 ring-gray-300 hover:bg-gray-50
+                    {% if request.GET.filter == 'my' %} bg-[--color-button]/10 text-[--color-button] ring-[--color-button]/30 {% endif %}">
+            My Products
+          </a>
+        </div>
+      </div>
 
-<!-- Untuk mengarah ke URL secara dinamis berdasarkan app_name dan name 
- yang sudah didefinisikan di urls.py. -->
-<a href="{% url 'main:logout' %}">
-  <button>Logout</button>
-</a>
-
-<h5>Sesi terakhir login: {{ last_login }}</h5>
-
-<!-- Divider -->
-<hr>
-
-<a href="?filter=all">
-    <button type="button">All Products</button>
-</a>
-<a href="?filter=my">
-    <button type="button">My Products</button>
-</a> 
+      <!-- Last login -->
+      <div class="text-sm text-gray-500
+         text-center sm:text-right
+         justify-self-center sm:justify-self-end
+         mt-2 sm:mt-0">
+        Last login: {{ last_login|default:"Never" }}
+      </div>
+    </div>
+  </div>
 
 
-{% if not product_list %}
-<p>No product added yet.</p>
-{% else %}
+  {% if not product_list %}
+    <!-- Empty state -->
+    <div class="rounded-2xl bg-white ring-1 ring-gray-200 p-10 text-center">
+      <p class="text-gray-600">No product added yet.</p>
+      <a href="{% url 'main:create_product' %}" class="mt-4 inline-block rounded-lg bg-[--color-button] px-3 py-2 text-sm font-semibold text-white hover:bg-[--color-button-hover]">Add your first product</a>
+    </div>
+  {% else %}
 
-{% for product in product_list %}
-<div>
-  <h2><a href="{% url 'main:show_product' product.id %}">{{ product.name }}</a></h2>
+  <!-- GRID -->
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    {% for product in product_list %}
+    <!-- CARD -->
+    <article
+      class="group relative flex h-full flex-col overflow-hidden
+            rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm
+            transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
 
-  <p>{% if product.is_product_hot %} 
-    <b>Hot🔥|</b>{% endif %} Product Viewed: {{ product.product_views }}</p>
+      <!-- Cover/Thumbnail -->
+      <div class="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100">
+        {% if product.thumbnail %}
+          <img src="{{ product.thumbnail }}" alt="{{ product.name }}"
+              class="h-full w-full object-cover object-center
+               transition duration-300 group-hover:scale-105" />
+        {% else %}
+          <div class="flex h-full w-full items-center justify-center text-sm text-gray-500">
+            No Image
+          </div>
+        {% endif %}
 
-  {% if product.thumbnail %}
-  <img src="{{ product.thumbnail }}" alt="thumbnail" width="150" height="100">
-  <br />
+        <!-- Badges -->
+        {% if product.is_product_hot %}
+        <span class="absolute left-3 top-3 inline-flex items-center rounded-full
+                    bg-pink-50 px-2 py-0.5 text-xs font-semibold border-pink-300 text-pink-700
+                    ring-1 ring-pink-200">Hot 🔥</span>
+        {% endif %}
+      </div>
+
+      <!-- Body -->
+      <div class="flex flex-1 flex-col p-4 gap-3">
+        <h3 class="text-base font-semibold text-gray-900 line-clamp-1">
+          <a href="{% url 'main:show_product' product.id %}" class="hover:underline">
+            {{ product.name }}
+          </a>
+        </h3>
+
+        <!-- Price -->
+        <div class="text-lg font-semibold text-gray-900">
+          {{ product.price_in_rupiah }}
+        </div>
+
+        <!-- Optional small meta (tanggal) -->
+        <div class="text-xs text-gray-500">{{ product.created_at|date:"M d, Y" }}</div>
+
+        <!-- Description -->
+        <p class="text-sm text-gray-600 line-clamp-2">
+          {{ product.description }}
+        </p>
+
+        <!-- Rating + Views -->
+        <div class="mt-auto">
+          <div class="flex items-center justify-between text-sm text-gray-500">
+            <!-- Stars (CSS calc, mendukung desimal: 4.5/5, dst.) -->
+            <div class="inline-flex items-center gap-2" aria-label="Rating {{ product.rating|default:'0' }} out of 5">
+              <span class="relative inline-block leading-none">
+                <span class="text-gray-300 select-none">★★★★★</span>
+                <span class="absolute inset-0 overflow-hidden text-amber-500 select-none"
+                      style="width: calc({{ product.rating|default:'0' }} / 5 * 100%);">
+                  ★★★★★
+                </span>
+              </span>
+              <span class="text-gray-700">{{ product.rating|default:"0" }}/5</span>
+            </div>
+
+            <span class="inline-flex items-center gap-1">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              {{ product.product_views }}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="pt-3 justify-between">
+            <a href="{% url 'main:show_product' product.id %}"
+              class="z-10 inline-flex items-center justify-center rounded-lg
+                      bg-[--color-button] px-3 py-1.5 text-sm font-semibold text-white
+                      hover:bg-[--color-button-hover]">
+              Details
+            </a>
+
+            {% if user.is_authenticated and product.user == user %}
+            <a href="{% url 'main:edit_product' product.id %}"
+              class="z-10 inline-flex items-center justify-center rounded-lg
+                      px-3 py-1.5 text-sm font-semibold text-gray-700
+                      ring-1 ring-gray-300 hover:bg-gray-50">
+              Edit
+            </a>
+            <button type="button"
+                    data-url="{% url 'main:delete_product' product.id %}"
+                    data-name="{{ product.name|escapejs }}"
+                    class="js-open-delete z-10 ml-2 inline-flex items-center justify-center rounded-lg
+                          px-3 py-1.5 text-sm font-semibold text-red-600
+                          ring-1 ring-red-200 hover:bg-red-50">
+              Delete
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
   {% endif %}
+</section>
 
-  <p>{{ product.description|truncatewords:25 }}...</p>
+<!-- Delete confirmation modal (untuk tombol Delete) -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden">
+  <!-- backdrop -->
+  <div data-close class="absolute inset-0 bg-black/40"></div>
 
-  <p>
-    <a href="{% url 'main:show_product' product.id %}"><button>Detail Product</button></a>
-    {% if user.is_authenticated and product.user == user %}
-    <a href="{% url 'main:edit_product' product.id %}">
-      <button>
-        Edit
-      </button>
-     </a>
-     <a href="{% url 'main:delete_product' product.id %}">
-      <button>
-          Delete Product
-      </button>
-      </a>
-    {% endif %}
-  </p>
+  <!-- dialog -->
+  <div class="absolute inset-0 grid place-items-center p-4">
+    <div role="dialog" aria-modal="true" aria-labelledby="delTitle"
+         class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl ring-1 ring-black/5">
+      <h3 id="delTitle" class="text-lg font-semibold text-gray-900">Delete product?</h3>
+      <p class="mt-2 text-sm text-gray-600">
+        Are you sure you want to delete <span id="delName" class="font-medium"></span>? This action can’t be undone.
+      </p>
+
+      <form id="deleteForm" method="POST" class="mt-6 flex justify-end gap-3">
+        {% csrf_token %}
+        <button type="button" data-close
+                class="rounded-lg px-4 py-2 ring-1 ring-gray-300 text-gray-700 hover:bg-gray-50">
+          Cancel
+        </button>
+        <button type="submit"
+                class="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-500">
+          Delete
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 
-<hr>
-{% endfor %}
+<!-- Khusus agar modal tombol Delete bekerja -->
+<script>
+(() => {
+  const modal = document.getElementById('deleteModal');
+  const form  = document.getElementById('deleteForm');
+  const nameEl = document.getElementById('delName');
 
-{% endif %}
+  function openModal(url, name) {
+    form.action = url;
+    nameEl.textContent = name || 'this product';
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  // open
+  document.querySelectorAll('.js-open-delete').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.url, btn.dataset.name));
+  });
+
+  // close on backdrop / cancel
+  modal.addEventListener('click', e => {
+    if (e.target.hasAttribute('data-close')) closeModal();
+  });
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+  });
+})();
+</script>
+
+<!-- Footer Pembuatan Website -->
+<footer class="mt-10 border-t border-gray-200 py-6">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center text-sm text-gray-500">
+      <p class="order-2 sm:order-1">&copy; {% now "Y" %} Treble Eshop. All rights reserved. Made by Neal & Aloe Vera</p>
+    </div>
+  </div>
+</footer>
+
 {% endblock content %}
+
+
+<!-- Asli -->
+<!-- <div class="pt-5" style="flex: 1 0 auto">
+  <h1>Treble Eshop: Game On, Style On</h1>
+
+  <h4 style="margin-bottom:1px;">NPM: </h4>
+  <p>{{ npm }}</p>
+  <h4 style="margin-bottom:1px;">Name: </h4>
+  <p>{{ name }}</p>
+  <h4 style="margin-bottom:1px;">Class: </h4>
+  <p>{{ class }}</p> -->
+
+  <!-- <button> itu untuk trigger action
+  <a> itu untuk navigasi -->
+  <!-- <a href="{% url 'main:create_product' %}">
+    <button>+ Add Product</button>
+  </a> -->
+
+  <!-- Untuk mengarah ke URL secara dinamis berdasarkan app_name dan name 
+  yang sudah didefinisikan di urls.py. -->
+  <!-- <a href="{% url 'main:logout' %}">
+    <button>Logout</button>
+  </a> -->
+
+  <!-- <h5>Sesi terakhir login: {{ last_login }}</h5> -->
+
+  <!-- Divider -->
+  <!-- <hr>
+
+  <a href="?filter=all">
+      <button type="button">All Products</button>
+  </a>
+  <a href="?filter=my">
+      <button type="button">My Products</button>
+  </a>  -->
+
+<!-- 
+  {% if not product_list %}
+  <p>No product added yet.</p>
+  {% else %}
+
+  {% for product in product_list %}
+  <div>
+    <h2><a href="{% url 'main:show_product' product.id %}">{{ product.name }}</a></h2>
+
+    <p>{% if product.is_product_hot %} 
+      <b>Hot🔥|</b>{% endif %} Product Viewed: {{ product.product_views }}</p>
+
+    {% if product.thumbnail %}
+    <img src="{{ product.thumbnail }}" alt="thumbnail" width="150" height="100">
+    <br />
+    {% endif %}
+
+    <p>{{ product.description|truncatewords:25 }}...</p>
+
+    <p>
+      <a href="{% url 'main:show_product' product.id %}"><button>Detail Product</button></a>
+      {% if user.is_authenticated and product.user == user %}
+      <a href="{% url 'main:edit_product' product.id %}">
+        <button>
+          Edit
+        </button>
+      </a>
+      <a href="{% url 'main:delete_product' product.id %}">
+        <button>
+            Delete Product
+        </button>
+        </a>
+      {% endif %}
+    </p>
+  </div>
+
+  <hr>
+  {% endfor %}
+
+  {% endif %}
+</div> -->

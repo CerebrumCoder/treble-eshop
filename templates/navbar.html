@@ -1,0 +1,140 @@
+<nav class="bg-white sticky top-0 w-full z-50 start-0 border-b shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 px-4">
+        <div class="flex-shrink-0">
+          <a href="{% url 'main:show_main' %}" class="text-black font-bold text-2xl">
+            <img src="../../static/images/treble-eshop.png" alt="Treble Eshop" class="mx-auto h-12 w-auto" />
+          </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-4">
+            <!-- Tombol Home -->
+            <a href="{% url 'main:show_main' %}" class="text-sm font-medium text-gray-900 hover:text-gray-600 px-3 py-2 rounded-md transition-colors duration-300">
+              Home</a>
+            
+            <!-- Tombol Create Product -->
+            <a href="{% url 'main:create_product' %}">
+              <button type="button" class="text-white bg-[--color-button] hover:bg-[--color-button-hover] focus:ring-4 focus:outline-none 
+                focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-[--color-button] dark:hover:bg-[--color-button-hover] dark:focus:ring-[--color-button]">
+                + Create Product
+              </button>
+            </a>
+
+          </div>
+        </div>
+
+         <!-- Desktop User Section (Logout dan Profil) -->
+        <div class="hidden md:block">
+          <div class="ml-4 flex items-center md:ml-6">
+            
+            <!-- Desktop Dropdown -->
+            {% if user.is_authenticated %}
+              <div class="relative">
+                <!-- Trigger Dropdown -->
+                <button onclick="toggleDropdownDesktop()" class="flex items-center text-sm font-medium text-gray-900 hover:text-gray-600">
+                  <span>{{ name|default:user.username }}</span>
+                  <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="dropdown-profile-desktop" class="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg hidden">
+                  <div class="px-4 py-2 text-sm font-medium text-gray-700">
+                    <p>{{ npm|default:"Student" }} - {{ class|default:"Class" }}</p>
+                    <!-- <p>Sesi terakhir login: {{ last_login }}</p> -->
+                  </div>
+                  <hr class="border-gray-200">
+                  <a href="{% url 'main:logout' %}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-100">
+                    Logout
+                  </a>
+                </div>
+              </div>
+
+            {% else %}
+              <a href="{% url 'main:login' %}" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Login
+              </a>
+              <a href="{% url 'main:register' %}" class="bg-[--color-button] hover:bg-[--color-button-hover] text-white px-4 py-2 rounded font-medium transition-colors">
+                Register
+              </a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="md:hidden">
+          <button onclick="toggleMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-900 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+            <span class="sr-only">Open main menu</span>
+            <svg id="menu-icon" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12h18M3 6h18M3 18h18"></path>
+            </svg>
+            <svg id="close-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu untuk mobile -->
+    <div id="menu" class="md:hidden hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <!-- Tombol Home -->
+        <a href="{% url 'main:show_main' %}" class="text-gray-900 hover:text-gray-600 
+        block px-3 py-2 rounded-md text-base font-medium">Home</a>
+        
+        <!-- Tombol Create Product -->
+        <a href="{% url 'main:create_product' %}">
+          <button type="button" class="text-white bg-[--color-button] hover:bg-[--color-button-hover] focus:ring-4 focus:outline-none 
+            focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-[--color-button] dark:hover:bg-[--color-button-hover] dark:focus:ring-[--color-button]">
+            + Create Product
+          </button>
+        </a>
+        
+
+        <!-- Mobile Dropdown -->
+        <div class="relative">
+          <!-- Trigger Dropdown -->
+          <button onclick="toggleDropdownMobile()" class="flex items-center text-base font-medium px-3 py-2 text-gray-900 hover:text-gray-600">
+            <span>{{ name|default:user.username }}</span>
+            <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div id="dropdown-profile-mobile" class="absolute left-0 mt-2 w-48 bg-white border rounded-md shadow-lg hidden">
+            <div class="px-4 py-2 text-sm font-medium text-gray-700">
+              <p>{{ npm | default:"Student" }} - {{ class|default:"Class" }}</p>
+              <!-- <p>Sesi terakhir login: {{ last_login }}</p> -->
+            </div>
+            <hr class="border-gray-200">
+            <a href="{% url 'main:logout' %}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-100">
+              Logout
+            </a>
+          </div>
+        </div>        
+      </div>
+    </div>
+    <script>
+        function toggleMenu() {
+          const menu = document.getElementById("menu");
+          menu.classList.toggle("hidden");
+        }
+        function toggleDropdownMobile() {
+          const dropdownMobile = document.getElementById("dropdown-profile-mobile");
+          dropdownMobile.classList.toggle("hidden");
+        }
+
+        function toggleDropdownDesktop() {
+            const dropdownDesktop = document.getElementById("dropdown-profile-desktop");
+            dropdownDesktop.classList.toggle("hidden");
+        }
+
+        function toggleDropdown() {
+          const dropdown = document.getElementById("dropdown-profile");
+          dropdown.classList.toggle("hidden");
+        }
+    </script>
+  </nav>

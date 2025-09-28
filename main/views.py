@@ -43,7 +43,7 @@ def show_main(request):
 
     context = {
         'npm': '2406348282',
-        'name': request.user.username,
+        'name': request.user.username.capitalize(),
         'class': 'PBP A',
         'product_list': product_list,
         'last_login': request.COOKIES.get('last_login', 'Never'),
@@ -179,7 +179,9 @@ def login_user(request):
             user = form.get_user()
             login(request, user)
             response = HttpResponseRedirect(reverse("main:show_main"))
-            response.set_cookie('last_login', str(datetime.datetime.now()))
+
+            # Di set hanya tanggal dan jam terakhir online
+            response.set_cookie('last_login', datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
             return response
 
     else:

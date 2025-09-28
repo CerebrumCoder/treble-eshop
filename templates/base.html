@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% block meta %} {% endblock meta %}
+
+    <!-- 1. CDN: Content Delivery Network dari Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. CSS Yang Bisa Di Apply ke Semua Halaman -->
+    <style type="text/tailwindcss">
+        :root { 
+            --color-button:#54826b;
+            --color-button-hover: #3b5c4c;
+        }
+        @layer base {
+            /* Style generik untuk semua input/select/textarea di dalam .form-style */
+            .form-style :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+            @apply mt-1 block w-full rounded-md border border-gray-300 bg-white
+                    px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 outline-none
+                    focus:border-[--color-button] focus:ring-2 focus:ring-[--color-button] transition;
+            }
+            .form-style textarea { @apply h-32 resize-y; }
+            .form-style input[type="file"] { @apply cursor-pointer; }
+            /* Optional helper styles */
+            .form-style .help { @apply mt-1 text-xs text-gray-500; }
+            .form-style .error { @apply mt-1 text-sm text-red-600; }
+        }
+    </style>
+    <!-- 3. CSS Biasa (eksternal) - override tampilannya -->
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    
+    
+</head>
+
+<body>
+    {% block content %} {% endblock content %}
+</body>
+</html>

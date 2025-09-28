@@ -1,32 +1,102 @@
 {% extends 'base.html' %}
+{% block meta %}<title>{{ product.name }} - Treble Eshop</title>{% endblock meta %}
+
 {% block content %}
-<p><a href="{% url 'main:show_main' %}"><button>← Back to Product List</button></a></p>
 
-<h1>{{ product.name }}</h1>
-<p><b>Category:</b> {{ product.get_category_display }}</p>
-<p><b>Price:</b> {{ product.price_in_rupiah }}</p>
-<p><b>Brand:</b> {{ product.brand_name }}</p>
-<p><b>Rating:</b> {{ product.rating }}/5</p>
-<p><b>Stock:</b> {{ product.stock }}</p>
-<p><b>Views:</b> {{ product.product_views }}</p>
+<section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+  <!-- Back -->
+  <a href="{% url 'main:show_main' %}"
+     class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M15 18l-6-6 6-6"/></svg>
+    Back to Product List
+  </a>
 
-{% if product.thumbnail %}
-<img src="{{ product.thumbnail }}" alt="Product thumbnail" width="300">
-<br /><br />
-{% endif %}
+  <!-- Main -->
+  <div class="mt-4 grid gap-8 md:grid-cols-2">
+    <!-- Image / media -->
+    <div class="relative overflow-hidden rounded-2xl bg-white ring-1 ring-gray-200">
+        <div class="h-[420px] sm:h-[480px] md:h-[560px]">
+            {% if product.thumbnail %}
+            <img src="{{ product.thumbnail }}" alt="{{ product.name }}"
+                class="h-full w-full object-cover object-center" />
+            {% else %}
+            <div class="flex h-full w-full items-center justify-center text-gray-400">No image</div>
+            {% endif %}
+        </div>
 
-{% if product.description != '' %}
-<p><b>Description:</b> {{ product.description }}</p>
-{% endif %}
+    {% if product.is_product_hot %}
+        <span class="absolute left-3 top-3 inline-flex items-center rounded-full
+                    bg-pink-50 px-2 py-0.5 text-xs font-semibold text-pink-700 ring-1 ring-pink-200">
+        Hot 🔥
+        </span>
+    {% endif %}
+    </div>
 
-{% if product.is_product_hot %}
-<p><b>This product is hot!🔥</b></p>
-{% endif %}
 
-{% if product.user %}
-    <p>Author: {{ product.user.username }}</p>
-{% else %}
-    <p>Author: Anonymous</p>
-{% endif %}
+    <!-- Details -->
+    <div class="space-y-4">
+      <h1 class="text-2xl font-bold text-gray-900">{{ product.name }}</h1>
 
+      <div class="flex flex-wrap items-center gap-3 text-sm">
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 ring-1 ring-gray-200">
+          {{ product.get_category_display }}
+        </span>
+        <span class="inline-flex items-center gap-1 text-amber-600">★ {{ product.rating }}/5</span>
+        <span class="inline-flex items-center gap-1 text-gray-600">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          {{ product.product_views }}
+        </span>
+      </div>
+
+      <!-- quick facts -->
+      <div class="rounded-xl bg-white ring-1 ring-gray-200 p-4">
+        <dl class="grid grid-cols-1 gap-y-3 sm:grid-cols-2 sm:gap-4">
+          <div>
+            <dt class="text-sm text-gray-500">Price</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ product.price_in_rupiah }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">Brand</dt>
+            <dd class="text-gray-900">{{ product.brand_name|default:"—" }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">Stock</dt>
+            <dd class="text-gray-900">{{ product.stock }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">Author</dt>
+            <dd class="text-gray-900">{{ product.user.username|default:"Anonymous" }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      {% if product.description %}
+      <div class="rounded-xl bg-white ring-1 ring-gray-200 p-4">
+        <h2 class="mb-2 text-sm font-medium text-gray-700">Description</h2>
+        <p class="leading-relaxed text-gray-700">{{ product.description }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="flex flex-wrap gap-2 pt-2">
+        <a href="{% url 'main:show_main' %}"
+           class="rounded-lg ring-1 ring-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          Back to Product List
+        </a>
+        {% if user.is_authenticated and product.user == user %}
+          <a href="{% url 'main:edit_product' product.id %}"
+             class="rounded-lg ring-1 ring-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+            Edit
+          </a>
+          <a href="{% url 'main:delete_product' product.id %}"
+             class="rounded-lg ring-1 ring-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">
+            Delete
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock content %}
