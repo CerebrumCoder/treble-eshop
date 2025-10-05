@@ -119,6 +119,30 @@
     </div>
 </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      const fd = new FormData(form); // {% csrf_token %} sudah ikut
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: fd,
+        credentials: "same-origin",
+      });
+      if (!res.ok) throw new Error("Register gagal");
+      showToast("Register", "Akun dibuat — silakan login", "success");
+      window.location.href = "{% url 'main:login' %}";
+    } catch (err) {
+      showToast("Register", err?.message || "Register gagal", "error");
+    }
+  });
+});
+</script>
+
 <!-- Asli -->
 <!-- <div>
     <h1>Register</h1>

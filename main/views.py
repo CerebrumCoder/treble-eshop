@@ -17,8 +17,13 @@ from main.forms import ProductForm
 # Untuk mengembalikan data dalam bentuk XML
 # HttpResponse merupakan class yang digunakan 
 # untuk menyusun respon yang ingin dikembalikan oleh server ke user
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.core import serializers
+
+# Untuk AJAX
+from django.views.decorators.http import require_POST
+from django.utils.html import strip_tags
+from django.shortcuts import get_object_or_404
 
 # Untuk merestriksi akses halaman tersebut berarti membatasi siapa saja yang boleh 
 # membuka halaman tersebut, misalnya hanya pengguna yang sudah login atau admin
@@ -26,7 +31,6 @@ from django.contrib.auth.decorators import login_required
 
 # Untuk menggunakan data dari cookies. 
 import datetime
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 # Potongan kode di bawah ini untuk restriksi bisa akses laman itu apabila sudah login
@@ -113,12 +117,6 @@ def show_xml(request):
     # model menjadi format lain seperti dalam fungsi ini adalah XML.
     xml_data = serializers.serialize("xml", product_list)
     return HttpResponse(xml_data, content_type="application/xml")
-
-# Untuk mengembalikan data semua produk dalam bentuk JSON
-def show_json(request):
-    product_list = Product.objects.all()
-    json_data = serializers.serialize("json", product_list)
-    return HttpResponse(json_data, content_type="application/json")
 
 # Untuk mengembalikan data berdasarkan ID dalam bentuk XML
 def show_xml_by_id(request, product_id):
@@ -216,3 +214,103 @@ def delete_product(request, id):
     product = get_object_or_404(Product, pk=id)
     product.delete()
     return HttpResponseRedirect(reverse('main:show_main'))
+
+# Untuk mengembalikan data semua produk dalam bentuk JSON
+# ---- LIST JSON dgn filter ?mine=1 ----
+def show_json(request):
+    qs = Product.objects.all().order_by('-id')
+
+    # Query param ?mine=1 → tampilkan milik user saja
+    mine = (request.GET.get('mine') or '').strip().lower()
+    if mine in ('1', 'true', 'yes'):
+        if request.user.is_authenticated:
+            qs = qs.filter(user=request.user)
+        else:
+            return JsonResponse([], safe=False)  # belum login → kosong
+
+    # _pdict() kirim field yang dibutuhkan front-end (termasuk is_owner)
+    data = [_pdict(p, request) for p in qs]
+    return JsonResponse(data, safe=False)
+
+# ============== AJAX (Tutorial 5 style) ==============
+
+# ---- Serializer ringan utk Product -> dict ----
+def _pdict(p, request=None):
+    # NOTE: kalau sering render dari JSON ke HTML, biasakan "trim" string
+    def s(v): return (v or "").strip()
+
+    d = {
+        "id": str(p.id),
+        "name": s(p.name),
+        "description": s(p.description),
+        "price": int(getattr(p, "price", 0)),
+        "stock": int(getattr(p, "stock", 0)),
+        "thumbnail": s(getattr(p, "thumbnail", "")),
+        "brand_name": s(getattr(p, "brand_name", "")),
+        "rating": int(getattr(p, "rating", 0)),
+        "product_views": int(getattr(p, "product_views", 0)),
+        "is_product_hot": bool(getattr(p, "is_product_hot", False)),
+    }
+    if hasattr(p, "created_at") and p.created_at:
+        d["created_at"] = p.created_at.isoformat()
+
+    # Tampilkan tombol Edit/Delete hanya utk pemilik
+    d["is_owner"] = bool(request and request.user.is_authenticated and getattr(p, "user_id", None) == request.user.id)
+    return d
+
+@require_POST
+def add_product_entry_ajax(request):
+    name = strip_tags((request.POST.get("name") or "").strip())
+    description = strip_tags((request.POST.get("description") or "").strip())
+    price = request.POST.get("price")
+    stock = request.POST.get("stock") or 0
+    thumbnail = strip_tags((request.POST.get("thumbnail") or "").strip())
+
+    if not name:
+        return HttpResponseBadRequest("Name is required")
+    try:
+        price = int(price); stock = int(stock)
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid number")
+
+    p = Product(name=name, description=description, price=price)
+    if hasattr(p, "stock"): p.stock = stock
+    if hasattr(p, "thumbnail"): p.thumbnail = thumbnail
+    if request.user.is_authenticated and hasattr(p, "user"):
+        p.user = request.user
+
+    p.save()
+    return JsonResponse(_pdict(p, request), status=201)  # balas item utk prepend di UI
+
+@require_POST
+def edit_product_entry_ajax(request, id):
+    p = get_object_or_404(Product, pk=id)
+
+    # NOTE: batasi edit utk pemilik (aktifkan kalau perlu)
+    # if p.user_id != request.user.id: return HttpResponse(status=403)
+
+    if "name" in request.POST:
+        p.name = strip_tags((request.POST.get("name") or "").strip())
+    if "description" in request.POST:
+        p.description = strip_tags((request.POST.get("description") or "").strip())
+    if "price" in request.POST:
+        try: p.price = int(request.POST.get("price"))
+        except (TypeError, ValueError): return HttpResponseBadRequest("Invalid price")
+    if "stock" in request.POST and hasattr(p, "stock"):
+        try: p.stock = int(request.POST.get("stock"))
+        except (TypeError, ValueError): return HttpResponseBadRequest("Invalid stock")
+    if "thumbnail" in request.POST and hasattr(p, "thumbnail"):
+        p.thumbnail = strip_tags((request.POST.get("thumbnail") or "").strip())
+
+    p.save()
+    return JsonResponse(_pdict(p, request), status=200)  # balas item utk replace di UI
+
+@require_POST
+def delete_product_ajax(request, id):
+    p = get_object_or_404(Product, pk=id)
+    # NOTE: batasi delete utk pemilik (aktifkan kalau perlu)
+    # if p.user_id != request.user.id: return HttpResponse(status=403)
+
+    pid = str(p.id)
+    p.delete()
+    return JsonResponse({"ok": True, "id": pid}, status=200)  # UI remove card by data-id

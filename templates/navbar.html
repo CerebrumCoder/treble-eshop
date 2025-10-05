@@ -21,6 +21,13 @@
                 + Create Product
               </button>
             </a>
+            
+            <!-- Tombol Create Product Tapi Pake AJAX -->
+            <button type="button" id="btnNavCreateAjax"
+                    class="text-white bg-[--color-button] hover:bg-[--color-button-hover] focus:ring-4 focus:outline-none 
+            focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-[--color-button] dark:hover:bg-[--color-button-hover] dark:focus:ring-[--color-button]">
+              Create Product (AJAX)
+            </button>
 
           </div>
         </div>
@@ -47,7 +54,7 @@
                     <!-- <p>Sesi terakhir login: {{ last_login }}</p> -->
                   </div>
                   <hr class="border-gray-200">
-                  <a href="{% url 'main:logout' %}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-100">
+                  <a id="logoutlink" href="{% url 'main:logout' %}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-100">
                     Logout
                   </a>
                 </div>
@@ -92,6 +99,12 @@
           </button>
         </a>
         
+        <!-- Tombol Create Product Tapi Pake AJAX -->
+        <button type="button" id="btnNavCreateAjax"
+                class="text-white bg-[--color-button] hover:bg-[--color-button-hover] focus:ring-4 focus:outline-none 
+            focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-[--color-button] dark:hover:bg-[--color-button-hover] dark:focus:ring-[--color-button]">
+          Create Product (AJAX)
+        </button>
 
         <!-- Mobile Dropdown -->
         <div class="relative">

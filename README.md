@@ -283,3 +283,110 @@ Cara implementasinya, misal punya HTML elemen ini:
     - Lalu juga pembuatan styling untuk file edit_product.html, create_product.html, product_detail.html dengan bantuan tailwindcss dan ChatGPT untuk membantu pembuatan kerangka style websitenya
     - Adapun jika ingin melihat detail lebih lanjutnya, bisa dilihat di file **Treble_Eshop_Implementation.pdf**. Ini merupakan bantuan generate GPT, karena ada banyak yang belum saya cover dalam penjelasan pertanyaan ini.
 
+**Tugas 6: 3 Oktober 2025**
+
+### 1. Apa perbedaan antara synchronous request dan asynchronous request?
+Synchronous (blocking): Browser kirim request → tunggu server selesai → halaman/section baru dirender ulang penuh. Contoh: form POST klasik di Django yang mengembalikan HttpResponse dengan template baru; seluruh DOM diganti.  
+Asynchronous (non‑blocking): Browser (JS) kirim request di background (fetch / XMLHttpRequest / HTMX) → UI tetap responsif → hanya fragmen DOM diperbarui saat respon tiba. Tidak ada full reload atau pengosongan state (scroll position, komponen lain).  
+Perbandingan ringkas:  
+- Blocking vs non‑blocking.  
+- Reload penuh vs partial update.  
+- Lebih sederhana (HTML form langsung) vs lebih interaktif (dynamic fragment).  
+Penggunaan: Operasi sederhana (login dasar, form kecil) boleh synchronous; interaksi dinamis (live filter, infinite scroll, cart update) ideal asynchronous.
+
+### 2. Bagaimana AJAX bekerja di Django (alur request–response)?
+Alur tipikal:  
+1. Event UI: klik tombol / submit form dicegah default-nya oleh JS.  
+2. JavaScript ambil token CSRF (cookie csrftoken) dan kirim fetch() / XHR ke endpoint (URL yang didaftarkan di urls.py).  
+3. urls.py memetakan path ke view (function / class-based).  
+4. View: validasi → (opsional) query/ubah data via models.py → bentuk data Python (dict / list).  
+5. Serialisasi: balas JSON (JsonResponse) atau HTML fragment (render_to_string) tergantung kebutuhan.  
+6. Respon diterima di front-end → Promise resolve → JS manipulasi DOM (innerHTML, append, remove) + update state lokal (counter, badge, dsb.) tanpa full reload.  
+7. (Opsional) Error handling: status ≥400 ditangani untuk menampilkan pesan validasi inline.  
+
+Contoh ringkas pattern:
+```python
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.middleware.csrf import get_token
+
+@require_POST
+def ajax_add_product(request):
+    # Ambil field dari JSON body
+    import json
+    data = json.loads(request.body)
+    # Validasi sederhana
+    if not data.get("name"):
+        return JsonResponse({"error": "Name required"}, status=400)
+    # Simpan (contoh minimal)
+    p = Product.objects.create(name=data["name"], price=data.get("price", 0))
+    return JsonResponse({"id": str(p.id), "name": p.name, "price": p.price})
+```
+```javascript
+// front-end
+fetch("/ajax/add-product/", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-CSRFToken": getCookie("csrftoken")
+  },
+  body: JSON.stringify({name, price})
+})
+.then(r => r.json())
+.then(d => {
+  if (d.error) { showError(d.error); return; }
+  appendProductCard(d);
+});
+```
+### 3. Apa keuntungan menggunakan AJAX dibandingkan render biasa di Django?
+Keuntungan utama:  
+- Performa & persepsi kecepatan: transfer payload kecil (JSON/fragment), bukan full HTML page.  
+- UX lebih halus: State UI (scroll, input lain) tidak hilang.  
+- Interaksi real-time: live search, debounced filter, badge notifikasi, cart counter.  
+- Beban server & bandwidth menurun: caching lebih granular, fragment bisa dihindari jika tak berubah.  
+- Modularitas: Endpoint JSON dapat dipakai ulang oleh aplikasi mobile / SPA / microservices.  
+- Better progressive enhancement: Halaman dasar tetap bisa jalan tanpa JS, fitur lanjutan aktif bila JS tersedia.  
+Trade-off: Kompleksitas meningkat (error handling klien, race condition, manajemen state). SEO konten dinamis perlu fallback atau prerender.
+
+### 4. Bagaimana cara memastikan keamanan saat menggunakan AJAX untuk fitur Login dan Register di Django?
+Prinsip: Validasi dan keamanan selalu server‑side; AJAX hanya transport. Praktik utama:  
+- HTTPS wajib: enkripsi kredensial (aktifkan SESSION_COOKIE_SECURE & CSRF_COOKIE_SECURE).  
+- CSRF protection: kirim header X-CSRFToken; pastikan token di template dengan {% csrf_token %}.  
+- Rate limiting / throttling percobaan login (django-axes atau middleware custom).  
+- Password hashing: Django sudah otomatis (PBKDF2). Jangan pernah kirim password kembali dalam respon.  
+- Error message generik: Hindari enumerasi user (“Invalid credentials” saja).  
+- Set flag cookie: HttpOnly, Secure, SameSite=Lax/Strict untuk mitigasi XSRF & JS access.  
+- Input validation & server-side form (AuthenticationForm / custom Form) tetap dipakai; jangan percaya data JSON mentah.  
+- Audit & logging event login / register (suspicious pattern).  
+- HSTS & header proteksi (X-Content-Type-Options, X-Frame-Options, CSP jika perlu).  
+
+Contoh konfigurasi produksi minimal:
+```python
+# settings.py (cuplikan)
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_TRUSTED_ORIGINS = ["https://neal-guarddin-trebleeshop.pbp.cs.ui.ac.id"]
+SESSION_COOKIE_SAMESITE = "Lax"
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+```
+
+### 5. Bagaimana AJAX mempengaruhi pengalaman pengguna (User Experience) pada website?
+Dampak positif:  
+- Respons instan (perceived performance meningkat).  
+- Konten adaptif: bagian kecil halaman diperbarui tanpa “flash” reload.  
+- Inline validation: kesalahan form langsung muncul → mengurangi frustasi.  
+- Micro-interactions (badge berubah, tombol loading state) meningkatkan rasa kontrol.  
+- Mendukung pola modern: infinite scroll, autosave draft, live preview.  
+Potensi masalah bila salah pakai:  
+- Tidak ada fallback (akses tanpa JS gagal).  
+- Navigasi & histori buruk (harus kelola pushState).  
+- Accessibility terabaikan (screen reader tidak diberi ARIA live region).  
+Mitigasi: progressive enhancement, indikator loading jelas, update fokus ARIA, dokumentasi event.
+
+---

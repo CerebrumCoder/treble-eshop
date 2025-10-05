@@ -32,10 +32,89 @@
     <!-- 3. CSS Biasa (eksternal) - override tampilannya -->
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
     
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
     
 </head>
 
 <body>
     {% block content %} {% endblock content %}
+
+    <!-- ===== TOAST ===== -->
+    <div
+    id="toast-component"
+    class="fixed bottom-8 right-8 p-4 px-8 rounded-xl shadow-xl z-50 opacity-0 transition-all duration-300 translate-y-64 flex items-center gap-4 bg-white border border-gray-300 text-gray-800"
+    >
+        <span id="toast-icon" class="text-2xl">🔔</span>
+        <div>
+            <h3 id="toast-title" class="font-bold">Sample Title</h3>
+            <p id="toast-message" class="text-gray-700 text-sm line-clamp-3">Sample Message</p>
+        </div>
+    </div>
+
+    <!-- 4. JS Biasa (eksternal) -->
+    <script>
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('#btnNavCreateAjax');
+        if (!btn) return;
+
+        e.preventDefault();
+
+        // Kalau fungsi openProductModal tersedia (berarti kita sedang di main.html),
+        // langsung buka modalnya. Kalau belum ada, pindah ke halaman main dengan ?create=1.
+        if (typeof window.openProductModal === 'function') {
+            window.openProductModal();
+        } else {
+            // Ganti ini kalau nama route halaman utama kamu berbeda
+            const mainUrl = "{% url 'main:show_main' %}";
+            // simpan tujuan semula (opsional), kalau mau balik lagi setelah create
+            const next = encodeURIComponent(window.location.pathname + window.location.search);
+            const url = mainUrl + "?create=1&next=" + next;
+            window.location.href = url;
+        }
+        
+    });
+
+    document.addEventListener("click", async (e) => {
+        const a = e.target.closest("#logoutlink");   // id di navbar.html
+        if(!a) {
+            return;
+        }
+        e.preventDefault();
+        try {
+            await fetch(a.href, { credentials:"same-origin" });
+            showToast("Logout","Berhasil logout","success");
+        } finally {
+            setTimeout(()=>{ window.location.href = "{% url 'main:login' %}"; }, 150);
+        }
+    });
+    function showToast(title, message, type='normal', duration=3000){
+        const el = document.getElementById('toast-component');
+        const t  = document.getElementById('toast-title');
+        const m  = document.getElementById('toast-message');
+        if(!el) return;
+        el.classList.remove('bg-red-50','text-red-600','border-red-500','bg-green-50','text-green-600','border-green-500','bg-white','text-gray-800','border-gray-300');
+        if(type==='success'){ 
+            el.classList.add('bg-green-50','text-green-600','border-green-500'); el.style.border='1px solid #22c55e'; 
+        }
+        else if(type==='error'){ 
+            el.classList.add('bg-red-50','text-red-600','border-red-500'); 
+            el.style.border='1px solid #ef4444'; 
+        }
+        else { 
+            el.classList.add('bg-white','text-gray-800','border-gray-300'); 
+            el.style.border='1px solid #d1d5db'; 
+        }
+        t.textContent = title; 
+        m.textContent = message;
+        el.classList.remove('opacity-0','translate-y-64'); 
+        el.classList.add('opacity-100','translate-y-0');
+        setTimeout(()=>{ 
+            el.classList.remove('opacity-100','translate-y-0'); 
+            el.classList.add('opacity-0','translate-y-64'); }, 
+            duration
+            );
+        }
+    </script>
+
 </body>
 </html>

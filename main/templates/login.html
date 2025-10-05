@@ -11,8 +11,6 @@
         <h2 class="mt-5 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign In to Treble Eshop</h2>
     </div>
 
-    
-
     <div class="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
         {% if form.non_field_errors %}
         <div class="mb-6">
@@ -115,31 +113,36 @@
     </div>
 </div>
 
-<!-- Asli -->
-<!-- <div class="login">
-    <h1>Login - Treble Eshop</h1>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  if (!form) return;
 
-    <form method="POST" action="">
-        {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-            <tr>
-                <td></td>
-                <td><input class="btn login_btn" type="submit" value="login" /></td>
-            </tr>
-        </table>
-    </form>
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),        // {% csrf_token %} sudah ikut
+        credentials: "same-origin",
+        redirect: "follow",
+      });
+      if (!res.ok) throw new Error("Login gagal");
 
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %} Don't have an account yet?
-    <a href="{% url 'main:register' %}">Register Now</a>
+      // Tampilkan toast dulu, baru redirect setelah sedikit delay
+      showToast("Login", "Berhasil login", "success");
+      await new Promise(r => setTimeout(r, 450));   // biar toast sempat terlihat
+      window.location.href = "{% url 'main:show_main' %}";
 
-</div> -->
+      // Alternatif (jika mau toast muncul di halaman main):
+      // window.location.href = "{% url 'main:show_main' %}?toast=login";
+    } catch (err) {
+      showToast("Login", err?.message || "Login gagal", "error");
+    }
+  });
+});
+</script>
+
 {% endblock content %}
 
 

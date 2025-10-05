@@ -20,7 +20,9 @@ from django.contrib.auth.models import User
 class Product(models.Model):
 
     # Kode di bawah berfungsi untuk menghubungkan satu produk dengan satu user melalui sebuah relationship
-    # Setiap news dapat terasosiasi dengan seorang user (many-to-one relationship)
+    # Setiap products dapat terasosiasi dengan seorang user (many-to-one relationship)
+    # (one-to-one relationship) -> satu user dengan satu account/profile itu sendiri
+    # (many-to-many relationship) -> kuis ke user yang banyak
     # null=True memungkinkan news yang sudah ada sebelumnya tetap valid tanpa harus memiliki user
     # on_delete=models.CASCADE berarti jika user dihapus, semua news milik user tersebut juga akan ikut terhapus
 
@@ -45,7 +47,7 @@ class Product(models.Model):
     product_views = models.PositiveIntegerField(default=0)
     stock = models.IntegerField(default=0)
     rating = models.IntegerField(default=0)
-    brand_name = models.CharField(max_length=255, default="Generic Brand")
+    brand_name = models.CharField(max_length=255)
     
     # Dari Tutorial
     title = models.CharField(max_length=255, default="Produk")

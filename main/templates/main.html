@@ -8,7 +8,7 @@
     <h1 class="text-3xl font-bold tracking-tight text-gray-900">Treble Eshop: Game On, Style On</h1>
     <p class="text-gray-600">Welcome back, {{ name }} — NPM {{ npm }} • Class {{ class }}</p>
   </header>
-
+  
   <!-- Filter Bar -->
   <div class="mb-6 rounded-2xl bg-white ring-1 ring-gray-200 p-3">
     <!-- mobile: 1 kolom (tombol di atas, last-login di bawah)
@@ -47,125 +47,68 @@
     </div>
   </div>
 
-
-  {% if not product_list %}
-    <!-- Empty state -->
-    <div class="rounded-2xl bg-white ring-1 ring-gray-200 p-10 text-center">
-      <img src="{% static '../../static/images/no-news.png' %}" alt="No news available" class="mx-auto h-64 w-auto object-contain">
-      <p class="text-gray-600">No product added yet.</p>
-      <a href="{% url 'main:create_product' %}" class="mt-4 
-      inline-block rounded-lg bg-[--color-button] px-3 
-      py-2 text-sm font-semibold text-white 
-      hover:bg-[--color-button-hover]">Add your first product</a>
-    </div>
-  {% else %}
-
-  <!-- GRID -->
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-    {% for product in product_list %}
-    <!-- CARD -->
-    <article
-      class="group relative flex h-full flex-col overflow-hidden
-            rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm
-            transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-
-      <!-- Cover/Thumbnail -->
-      <div class="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100">
-        {% if product.thumbnail %}
-          <img src="{{ product.thumbnail }}" alt="{{ product.name }}"
-              class="h-full w-full object-cover object-center
-               transition duration-300 group-hover:scale-105" />
-        {% else %}
-          <div class="flex h-full w-full items-center justify-center text-sm text-gray-500">
-            No Image
-          </div>
-        {% endif %}
-
-        <!-- Badges -->
-        {% if product.is_product_hot %}
-        <span class="absolute left-3 top-3 inline-flex items-center rounded-full
-                    bg-pink-50 px-2 py-0.5 text-xs font-semibold border-pink-300 text-pink-700
-                    ring-1 ring-pink-200">Hot 🔥</span>
-        {% endif %}
-      </div>
-
-      <!-- Body -->
-      <div class="flex flex-1 flex-col p-4 gap-3">
-        <h3 class="text-base font-semibold text-gray-900 line-clamp-1">
-          <a href="{% url 'main:show_product' product.id %}" class="hover:underline">
-            {{ product.name }}
-          </a>
-        </h3>
-
-        <!-- Price -->
-        <div class="text-lg font-semibold text-gray-900">
-          {{ product.price_in_rupiah }}
-        </div>
-
-        <!-- Optional small meta (tanggal) -->
-        <div class="text-xs text-gray-500">{{ product.created_at|date:"M d, Y" }}</div>
-
-        <!-- Description -->
-        <p class="text-sm text-gray-600 line-clamp-2">
-          {{ product.description }}
-        </p>
-
-        <!-- Rating + Views -->
-        <div class="mt-auto">
-          <div class="flex items-center justify-between text-sm text-gray-500">
-            <!-- Stars (CSS calc, mendukung desimal: 4.5/5, dst.) -->
-            <div class="inline-flex items-center gap-2" aria-label="Rating {{ product.rating|default:'0' }} out of 5">
-              <span class="relative inline-block leading-none">
-                <span class="text-gray-300 select-none">★★★★★</span>
-                <span class="absolute inset-0 overflow-hidden text-amber-500 select-none"
-                      style="width: calc({{ product.rating|default:'0' }} / 5 * 100%);">
-                  ★★★★★
-                </span>
-              </span>
-              <span class="text-gray-700">{{ product.rating|default:"0" }}/5</span>
-            </div>
-
-            <span class="inline-flex items-center gap-1">
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              {{ product.product_views }}
-            </span>
-          </div>
-
-          <!-- Actions -->
-          <div class="pt-3 justify-between">
-            <a href="{% url 'main:show_product' product.id %}"
-              class="z-10 inline-flex items-center justify-center rounded-lg
-                      bg-[--color-button] px-3 py-1.5 text-sm font-semibold text-white
-                      hover:bg-[--color-button-hover]">
-              Details
-            </a>
-
-            {% if user.is_authenticated and product.user == user %}
-            <a href="{% url 'main:edit_product' product.id %}"
-              class="z-10 inline-flex items-center justify-center rounded-lg
-                      px-3 py-1.5 text-sm font-semibold text-gray-700
-                      ring-1 ring-gray-300 hover:bg-gray-50">
-              Edit
-            </a>
-            <button type="button"
-                    data-url="{% url 'main:delete_product' product.id %}"
-                    data-name="{{ product.name|escapejs }}"
-                    class="js-open-delete z-10 ml-2 inline-flex items-center justify-center rounded-lg
-                          px-3 py-1.5 text-sm font-semibold text-red-600
-                          ring-1 ring-red-200 hover:bg-red-50">
-              Delete
-            </button>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </article>
-    {% endfor %}
+  <!-- Toolbar -->
+  <div class="flex items-center gap-2 mb-4">
+    <button id="btnRefresh" class="px-3 py-2 rounded-md border">Refresh</button>
   </div>
-  {% endif %}
+
+  <!-- States -->
+  <div id="loading" class="hidden text-gray-600">Loading products…</div>
+  <div id="error" class="hidden text-rose-700"></div>
+  <div id="grid" class="hidden"></div>
+  <div id="empty" class="hidden text-gray-600">Belum ada product.</div>
+
+  <!-- Modal Create Product -->
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <!-- Modal: Product Form -->
+    <div id="productModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+      <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b">
+          <h3 id="productModalTitle" class="font-semibold">Create Product</h3>
+          <button class="text-gray-500 hover:text-gray-700" onclick="closeProductModal()">×</button>
+        </div>
+        <form id="productForm" class="p-4 space-y-3">
+          <input type="hidden" name="id" />
+          {% csrf_token %}
+          <label class="block text-sm">Nama
+            <input name="name" required maxlength="100" class="mt-1 w-full rounded-lg border px-3 py-2" />
+          </label>
+          <label class="block text-sm">Harga
+            <input name="price" type="number" step="1" min="0" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+          </label>
+          <label class="block text-sm">Stock
+            <input name="stock" type="number" min="0" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+          </label>
+          <label class="block text-sm">Thumbnail (URL)
+            <input name="thumbnail" class="mt-1 w-full rounded-lg border px-3 py-2" />
+          </label>
+          <label class="block text-sm">Deskripsi
+            <textarea name="description" rows="3" class="mt-1 w-full rounded-lg border px-3 py-2"></textarea>
+          </label>
+          <div class="flex justify-end gap-2 pt-2 border-t">
+            <button type="button" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-colors text-center" onclick="closeProductModal()">Batal</button>
+            <button type="submit" class="order-1 sm:order-2 flex-1 bg-[--color-button] text-white px-6 py-3 rounded-md font-medium hover:bg-[--color-button-hover] transition-colors">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Confirm Delete -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+      <div class="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b">
+          <h3 class="font-semibold">Hapus Product?</h3>
+          <button class="text-gray-500 hover:text-gray-700" onclick="closeConfirmModal()">×</button>
+        </div>
+        <div class="p-4"><p id="confirmText">Yakin ingin menghapus?</p></div>
+        <div class="flex justify-end gap-2 px-4 py-3 border-t">
+          <button class="px-3 py-2 rounded-lg border" onclick="closeConfirmModal()">Batal</button>
+          <button id="btnConfirmDelete" class="px-3 py-2 rounded-lg text-white bg-rose-600 hover:bg-rose-700">Hapus</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <!-- Delete confirmation modal (untuk tombol Delete) -->
@@ -197,8 +140,8 @@
   </div>
 </div>
 
-<!-- Khusus agar modal tombol Delete bekerja -->
-<script>
+<!-- Khusus agar modal tombol Delete bekerja, yang sudah lama -->
+<!-- <script>
 (() => {
   const modal = document.getElementById('deleteModal');
   const form  = document.getElementById('deleteForm');
@@ -228,7 +171,7 @@
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
   });
 })();
-</script>
+</script> -->
 
 <!-- Footer Pembuatan Website -->
 <footer class="mt-10 border-t border-gray-200 py-6">
@@ -239,82 +182,366 @@
   </div>
 </footer>
 
-{% endblock content %}
+<script>
+  // ===== Konstanta endpoint (pakai URL tag) =====
+  const PRODUCTS_API_ENDPOINT = "{% url 'main:show_json' %}";
+  const CREATE_API = "{% url 'main:add_product_entry_ajax' %}";
+  const EDIT_API   = (id) => "{% url 'main:edit_product_entry_ajax' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', id);
+  const DELETE_API = (id) => "{% url 'main:delete_product_ajax' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', id);
 
+  // Ganti ini dengan nama route detail kamu jika beda:
+  const DETAIL_HREF_TEMPLATE = "{% url 'main:show_product' '00000000-0000-0000-0000-000000000000' %}";
+  const detailHref = (id) => DETAIL_HREF_TEMPLATE.replace('00000000-0000-0000-0000-000000000000', id);
 
-<!-- Asli -->
-<!-- <div class="pt-5" style="flex: 1 0 auto">
-  <h1>Treble Eshop: Game On, Style On</h1>
+  // ===== DOM =====
+  const loading = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
+  const emptyEl = document.getElementById('empty');
+  const grid    = document.getElementById('grid');
 
-  <h4 style="margin-bottom:1px;">NPM: </h4>
-  <p>{{ npm }}</p>
-  <h4 style="margin-bottom:1px;">Name: </h4>
-  <p>{{ name }}</p>
-  <h4 style="margin-bottom:1px;">Class: </h4>
-  <p>{{ class }}</p> -->
+  function displaySection({ showLoading=false, showError=false, showEmpty=false, showGrid=false }) {
+    loading.classList.toggle('hidden', !showLoading);
+    errorEl.classList.toggle('hidden', !showError);
+    emptyEl.classList.toggle('hidden', !showEmpty);
+    grid.classList.toggle('hidden', !showGrid);
+    if (showGrid) grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+  }
 
-  <!-- <button> itu untuk trigger action
-  <a> itu untuk navigasi -->
-  <!-- <a href="{% url 'main:create_product' %}">
-    <button>+ Add Product</button>
-  </a> -->
+  // Build card (Details · Edit · Delete), sanitize pakai DOMPurify
+  function buildProductCard(item){
+    const rating = Math.max(0, Math.min(5, Number(item.rating||0)));
+    const ratingPct = (rating/5)*100;
+    const views = Number(item.product_views||0);
 
-  <!-- Untuk mengarah ke URL secara dinamis berdasarkan app_name dan name 
-  yang sudah didefinisikan di urls.py. -->
-  <!-- <a href="{% url 'main:logout' %}">
-    <button>Logout</button>
-  </a> -->
+    const article = document.createElement('article');
+    article.className = "group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg";
+    article.dataset.id = item.id;
 
-  <!-- <h5>Sesi terakhir login: {{ last_login }}</h5> -->
+    const thumbHtml = item.thumbnail
+      ? `<img src="${DOMPurify.sanitize(item.thumbnail)}" alt="${DOMPurify.sanitize(item.name)}"
+              class="h-full w-full object-cover object-center transition duration-300 group-hover:scale-105" />`
+      : `<div class="flex h-full w-full items-center justify-center text-sm text-gray-500">No Image</div>`;
 
-  <!-- Divider -->
-  <!-- <hr>
+    const hotBadge = item.is_product_hot
+      ? `<span class="absolute left-3 top-3 inline-flex items-center rounded-full
+                      bg-pink-50 px-2 py-0.5 text-xs font-semibold border-pink-300 text-pink-700
+                      ring-1 ring-pink-200">Hot 🔥</span>`
+      : ``;
 
-  <a href="?filter=all">
-      <button type="button">All Products</button>
-  </a>
-  <a href="?filter=my">
-      <button type="button">My Products</button>
-  </a>  -->
+    
+    const detailsHref = detailHref(item.id); // sudah kamu definisikan sebelumnya
 
-<!-- 
-  {% if not product_list %}
-  <p>No product added yet.</p>
-  {% else %}
-
-  {% for product in product_list %}
-  <div>
-    <h2><a href="{% url 'main:show_product' product.id %}">{{ product.name }}</a></h2>
-
-    <p>{% if product.is_product_hot %} 
-      <b>Hot🔥|</b>{% endif %} Product Viewed: {{ product.product_views }}</p>
-
-    {% if product.thumbnail %}
-    <img src="{{ product.thumbnail }}" alt="thumbnail" width="150" height="100">
-    <br />
-    {% endif %}
-
-    <p>{{ product.description|truncatewords:25 }}...</p>
-
-    <p>
-      <a href="{% url 'main:show_product' product.id %}"><button>Detail Product</button></a>
-      {% if user.is_authenticated and product.user == user %}
-      <a href="{% url 'main:edit_product' product.id %}">
-        <button>
+    // tombol Edit/Delete hanya kalau owner
+    const ownerAction = item.is_owner ? `
+        <a href="#" data-edit="${item.id}"
+          class="z-10 inline-flex items-center justify-center rounded-lg
+                  px-3 py-1.5 text-sm font-semibold text-gray-700
+                  ring-1 ring-gray-300 hover:bg-gray-50">
           Edit
-        </button>
-      </a>
-      <a href="{% url 'main:delete_product' product.id %}">
-        <button>
-            Delete Product
-        </button>
         </a>
-      {% endif %}
-    </p>
-  </div>
+        <button type="button"
+                data-del="${item.id}"
+                data-name="${DOMPurify.sanitize(item.name)}"
+                class="z-10 ml-2 inline-flex items-center justify-center rounded-lg
+                      px-3 py-1.5 text-sm font-semibold text-red-600
+                      ring-1 ring-red-200 hover:bg-red-50">
+          Delete
+        </button>
+      ` : ``;
 
-  <hr>
-  {% endfor %}
+    article.innerHTML = `
+      <!-- Cover/Thumbnail -->
+      <div class="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100">
+        ${thumbHtml}
+        ${hotBadge}
+      </div>
 
-  {% endif %}
-</div> -->
+      <!-- Body -->
+      <div class="flex flex-1 flex-col p-4 gap-3">
+        <h3 class="text-base font-semibold text-gray-900 line-clamp-1">
+          <a href="${detailsHref}" class="hover:underline">
+            ${DOMPurify.sanitize(item.name)}
+          </a>
+        </h3>
+
+        <!-- Price -->
+        <div class="text-lg font-semibold text-gray-900">
+          ${rupiah(item.price)}
+        </div>
+
+        <!-- Optional small meta (tanggal) -->
+        <div class="text-xs text-gray-500">${fmtDate(item.created_at)}</div>
+
+        <!-- Description -->
+        <p class="text-sm text-gray-600 line-clamp-2">
+          ${DOMPurify.sanitize(item.description || '')}
+        </p>
+
+        <!-- Rating + Views -->
+        <div class="mt-auto">
+          <div class="flex items-center justify-between text-sm text-gray-500">
+            <!-- Stars -->
+            <div class="inline-flex items-center gap-2" aria-label="Rating ${rating} out of 5">
+              <span class="relative inline-block leading-none">
+                <span class="text-gray-300 select-none">★★★★★</span>
+                <span class="absolute inset-0 overflow-hidden text-amber-500 select-none"
+                      style="width: ${ratingPct}%;">
+                  ★★★★★
+                </span>
+              </span>
+              <span class="text-gray-700">${rating}/5</span>
+            </div>
+
+            <span class="inline-flex items-center gap-1">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-width="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              ${views}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="pt-3 justify-between">
+            <a href="${detailsHref}"
+              class="z-10 inline-flex items-center justify-center rounded-lg
+                      bg-[--color-button] px-3 py-1.5 text-sm font-semibold text-white
+                      hover:bg-[--color-button-hover]">
+              Details
+            </a>
+            ${ownerAction}
+          </div>
+        </div>
+      </div>
+    `;
+
+    return article;
+  }
+
+  // FETCH list
+  function getCSRF() {
+    return (
+      document.cookie.match(/csrftoken=([^;]+)/)?.[1] ||
+      document.querySelector('input[name=csrfmiddlewaretoken]')?.value ||
+      ''
+    );
+  }
+  async function fetchProducts(){
+    displaySection({ showLoading:true });
+    grid.innerHTML = '';
+    try{
+      // ← baca filter dari URL (?filter=my | ?filter=all | kosong)
+      const isMine = new URLSearchParams(window.location.search).get('filter') === 'my';
+
+      // ← tambahkan ?mine=1 ke endpoint JSON kalau My Products
+      const res  = await fetch(PRODUCTS_API_ENDPOINT + (isMine ? '?mine=1' : ''));
+      const data = await res.json(); // array
+
+      if (!Array.isArray(data) || data.length === 0){
+        displaySection({ showEmpty:true }); return;
+      }
+      grid.innerHTML = '';
+      data.forEach(item => grid.appendChild(buildProductCard(item)));
+      displaySection({ showGrid:true });
+    }catch(err){
+      errorEl.textContent = err?.message || 'Gagal memuat';
+      displaySection({ showError:true });
+    }
+  }
+  document.getElementById('btnRefresh')?.addEventListener('click', fetchProducts);
+  
+  // Untuk bisa filter My Product atau All Products
+  document.addEventListener('DOMContentLoaded', fetchProducts);
+
+  // Bersih sejak awal
+  const clean = (s) => typeof s === 'string' ? s.replace(/\u00A0/g, ' ').trim() : s;
+  // Modal helpers
+  function openProductModal(prod=null){
+    const m = document.getElementById('productModal');
+    const f = document.getElementById('productForm');
+    f.reset();
+    f.elements.id.value = prod?.id || '';
+    f.elements.name.value = prod?.name || '';
+    f.elements.price.value = prod?.price ?? '';
+    f.elements.stock.value = prod?.stock ?? '';
+    f.elements.thumbnail.value = prod?.thumbnail || '';
+    f.elements.description.value = prod?.description || '';
+    document.getElementById('productModalTitle').textContent = prod ? 'Update Product' : 'Create Product';
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  // Pastikan fungsi bisa diakses dari tombol navbar di base.html
+  window.openProductModal = openProductModal;
+
+  // Ketika datang dari navbar (redirect dengan ?create=1), buka modal otomatis
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('create') === '1') {
+      openProductModal();
+      // Opsional: hapus param dari URL biar rapi
+      params.delete('create');
+      const next = params.get('next'); // kalau kamu mau pakai nanti
+      const qs = params.toString();
+      history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
+    }
+  });
+
+  // Tutup Modal
+  function closeProductModal(){ 
+    const m = document.getElementById('productModal'); 
+    m.classList.add('hidden'); 
+    m.classList.remove('flex'); 
+  }
+
+  // Confirm Modal
+  function openConfirmModal(id, name){
+    const m = document.getElementById('confirmModal');
+    document.getElementById('confirmText').textContent = `Hapus "${name}"?`;
+    m.dataset.id = id;
+    m.classList.remove('hidden'); 
+    m.classList.add('flex');
+  }
+
+  function closeConfirmModal(){ 
+    const m=document.getElementById('confirmModal'); 
+    m.classList.add('hidden'); 
+    m.classList.remove('flex'); 
+    m.dataset.id=''; 
+  }
+
+  // CREATE/UPDATE → langsung append/replace DOM (tanpa refetch)
+  async function addOrUpdateProduct(fd){
+    const id  = fd.get('id');
+    const url = id ? EDIT_API(id) : CREATE_API;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      body: fd,                    // sudah ada csrfmiddlewaretoken dari form
+      credentials: 'same-origin',  // kirim cookie session
+    });
+
+    
+    if(!res.ok){
+      let msg='Gagal menyimpan';
+      try{ const j=await res.json(); msg=j?.error||msg; }catch{}
+      throw new Error(msg);
+    }
+    const item = await res.json(); // JSON item (balasan view)
+
+    // pastikan grid tampil
+    emptyEl.classList.add('hidden');
+    grid.classList.remove('hidden');
+    grid.classList.add('grid','grid-cols-1','md:grid-cols-2','lg:grid-cols-3','gap-6');
+
+    if (!id){
+      grid.prepend(buildProductCard(item));
+      showToast('Tersimpan', 'Product dibuat', 'success');
+    } else {
+      const old = grid.querySelector(`[data-id="${item.id}"]`);
+      const fresh = buildProductCard(item);
+      if (old) {
+        old.replaceWith(fresh);
+      }
+      showToast('Berhasil', 'Product diupdate', 'success');
+    }
+    closeProductModal();
+  }
+
+  // Submit form product
+  document.getElementById('productForm')?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    try{
+      await addOrUpdateProduct(new FormData(e.target));
+    }catch(err){
+      showToast('Gagal', err?.message || 'Gagal menyimpan', 'error');
+    }
+  });
+
+  // DELETE → remove DOM
+  document.getElementById('btnConfirmDelete')?.addEventListener('click', async () => {
+    const m = document.getElementById('confirmModal');
+    const id = m.dataset.id;
+    if (!id) return;
+
+    try {
+      const res = await fetch(DELETE_API(id), {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRF() },   // ⬅️ penting untuk lolos CSRF
+        body: new FormData(),                    // POST body (boleh kosong)
+        credentials: 'same-origin',              // kirim cookie session
+      });
+
+      if (!res.ok) {
+        let msg = `Gagal menghapus (HTTP ${res.status})`;
+        try { msg += ` — ${(await res.text()).slice(0,120)}`; } catch {}
+        showToast('Delete', msg, 'error');
+        return;
+      }
+
+      const j = await res.json();                           // { ok:true, id:'...' }
+      document.getElementById('grid')
+        .querySelector(`[data-id="${j.id}"]`)?.remove();
+
+      if (!document.getElementById('grid').children.length){
+        document.getElementById('grid').classList.add('hidden');
+        document.getElementById('empty').classList.remove('hidden');
+      }
+      showToast('Dihapus', 'Product dihapus', 'success');
+    } catch (e) {
+      showToast('Delete', e?.message || 'Gagal menghapus', 'error');
+    } finally {
+      m.dataset.id = '';
+      closeConfirmModal();
+    }
+  });
+
+  // Delegasi tombol Edit/Delete yang ada dari card
+  grid.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-edit], [data-del]');
+    if (!btn) return;
+
+    if (btn.dataset.edit){
+      const card = btn.closest('[data-id]');
+
+      const name = (card.querySelector('h3 a')?.textContent ?? '').trim();
+      const desc = (card.querySelector('p.text-sm.text-gray-600')?.textContent ?? '').trim();
+      const price = Number((card.querySelector('.text-lg.font-semibold')?.textContent || '').replace(/[^\d]/g,'')) || 0;
+      const stock = Number((card.textContent.match(/Stock:\s*(\d+)/)||[])[1]||0) || 0;
+      const thumbnail = (card.querySelector('img')?.getAttribute('src') || '').trim();
+
+      openProductModal({ id: btn.dataset.edit, name, description: desc, price, stock, thumbnail });
+      return;
+    }
+
+    if (btn.dataset.del){
+      openConfirmModal(btn.dataset.del, btn.dataset.name || '');
+      return;
+    }
+  });
+
+  // Helper supaya format uangnya bagus
+  function rupiah(n){
+    const v = Number(n||0);
+    // mirip {{ product.price_in_rupiah }}
+    return v.toLocaleString('id-ID', { style:'currency', currency:'IDR', maximumFractionDigits:0 });
+  }
+  function fmtDate(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    // mirip format "M d, Y" (Jan 02, 2025)
+    return d.toLocaleDateString('en-US', { month:'short', day:'2-digit', year:'numeric' });
+  }
+
+  // Aktifkan toast jika datang dengan ?toast=login
+  document.addEventListener("DOMContentLoaded", () => {
+    const p = new URLSearchParams(location.search);
+    if (p.get("toast") === "login") {
+      showToast("Login", "Selamat datang kembali", "success");
+      p.delete("toast");
+      history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
+    }
+  });
+  
+</script>
+
+
+{% endblock content %}
