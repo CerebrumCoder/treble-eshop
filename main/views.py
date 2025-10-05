@@ -170,22 +170,35 @@ def login_user(request):
     # Digunakan untuk memeriksa apakah pengguna mengirimkan 
     # permintaan login melalui halaman login
     if request.method == "POST":
-        # Authentikasi pengguna memakai AuthenticationForm
         form = AuthenticationForm(data=request.POST)
-        
+
+        # Anggap request AJAX jika header ini ada/accept json
+        is_ajax = (
+            request.headers.get('X-Requested-With', '').lower() in ('fetch', 'xmlhttprequest')
+            or 'application/json' in request.headers.get('Accept', '').lower()
+        )
+
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main"))
+            resp = HttpResponseRedirect(reverse("main:show_main"))
+            resp.set_cookie('last_login', datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-            # Di set hanya tanggal dan jam terakhir online
-            response.set_cookie('last_login', datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
-            return response
+            if is_ajax:
+                return JsonResponse({"ok": True, "redirect": reverse("main:show_main")}, status=200)
+            return resp
 
-    else:
-        form = AuthenticationForm()
-    context = {'form': form}
-    return render(request, 'login.html', context)
+        # ---- INVALID CREDENTIALS ----
+        if is_ajax:
+            # kembalikan 400 agar fetch tidak mengira sukses
+            return JsonResponse({"ok": False, "error": "Email/username atau password salah"}, status=400)
+
+        # non-AJAX: render ulang dengan error bawaan form
+        return render(request, 'login.html', {"form": form})
+
+    # GET
+    form = AuthenticationForm()
+    return render(request, 'login.html', {"form": form})
 
 # Untuk melakukan mekanisme logout
 def logout_user(request):

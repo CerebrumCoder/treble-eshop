@@ -114,33 +114,39 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
-  if (!form) return;
+    document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("form");
+    if (!form) return;
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(form.action, {
-        method: "POST",
-        body: new FormData(form),        // {% csrf_token %} sudah ikut
-        credentials: "same-origin",
-        redirect: "follow",
-      });
-      if (!res.ok) throw new Error("Login gagal");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+        const res = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),          // {% csrf_token %} sudah ikut
+            credentials: "same-origin",
+            headers: {
+            "X-Requested-With": "fetch",     // tandai ini AJAX
+            "Accept": "application/json",
+            },
+        });
 
-      // Tampilkan toast dulu, baru redirect setelah sedikit delay
-      showToast("Login", "Berhasil login", "success");
-      await new Promise(r => setTimeout(r, 450));   // biar toast sempat terlihat
-      window.location.href = "{% url 'main:show_main' %}";
+        // coba parse JSON; jika bukan JSON, buat objek kosong agar aman
+        const data = await res.json().catch(() => ({}));
 
-      // Alternatif (jika mau toast muncul di halaman main):
-      // window.location.href = "{% url 'main:show_main' %}?toast=login";
-    } catch (err) {
-      showToast("Login", err?.message || "Login gagal", "error");
-    }
-  });
-});
+        if (!res.ok || !data.ok) {
+            // backend kirim 400 + {"ok":false,"error":"..."} saat gagal
+            throw new Error(data.error || "Email/username atau password salah");
+        }
+
+        showToast("Login", "Berhasil login", "success");
+        // redirect dari payload backend (aman terhadap perubahan URL)
+        window.location.href = data.redirect || "{% url 'main:show_main' %}";
+        } catch (err) {
+        showToast("Login", err?.message || "Login gagal", "error");
+        }
+    });
+    });
 </script>
 
 {% endblock content %}
