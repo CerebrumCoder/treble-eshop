@@ -121,24 +121,49 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Ambil form pertama di halaman (form registrasi)
   const form = document.querySelector("form");
   if (!form) return;
 
   form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // ❗ Stop submit default (page reload)
+
     try {
-      const fd = new FormData(form); // {% csrf_token %} sudah ikut
+      // Kirim sebagai FormData -> CSRF token dari {% csrf_token %} otomatis ikut
       const res = await fetch(form.action, {
         method: "POST",
-        body: fd,
-        credentials: "same-origin",
-        redirect: "follow",
+        body: new FormData(form),
+        credentials: "same-origin",     // kirim session cookie
+        headers: {
+          "X-Requested-With": "fetch",  // tandai request ini AJAX
+          "Accept": "application/json", // minta balasan JSON dari server
+        },
       });
-      if (!res.ok) throw new Error("Register gagal");
+
+      // Coba parse JSON; kalau gagal (mis. error HTML), pakai objek kosong
+      const data = await res.json().catch(() => ({}));
+
+      // Gagal (HTTP 4xx/5xx) ATAU ok:false dari server -> tampilkan toast error
+      if (!res.ok || !data.ok) {
+        if (data.errors) {
+            // Gabungkan semua error jadi satu kalimat
+            const lines = [];
+            for (const [field, msgs] of Object.entries(data.errors)) {
+            lines.push(`${field}: ${msgs.join(", ")}`);
+            }
+            showToast("Register", lines.join(" • "), "error");
+        } else {
+            showToast("Register", "Register gagal", "error");
+        }
+        return;
+        }
+
+      // Berhasil
       showToast("Register", "Akun dibuat — silakan login", "success");
-      await new Promise(r => setTimeout(r, 450));   // <- biar toast sempat tampil
-      window.location.href = "{% url 'main:login' %}";
+      // Redirect ke halaman login (pakai URL yang server kirim agar robust)
+      window.location.href = data.redirect || "{% url 'main:login' %}";
     } catch (err) {
+      // Gagal jaringan/parse/hal lain
       showToast("Register", err?.message || "Register gagal", "error");
     }
   });

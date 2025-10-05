@@ -148,21 +148,49 @@ def show_json_by_id(request, product_id):
 # Untuk menghasilkan formulir registrasi secara otomatis dan menghasilkan 
 # akun pengguna ketika data di-submit dari form
 def register(request):
-    # Pake Form hasil buatan UserCreationForm()
+    """
+    Support dua mode:
+    - Non-AJAX (render template biasa)  -> untuk submit normal
+    - AJAX (fetch dari register.html)   -> balas JSON {ok:bool, errors?, redirect?}
+    """
     form = UserCreationForm()
 
     if request.method == "POST":
         form = UserCreationForm(request.POST)
-        if form.is_valid():
 
-            # Untuk membuat dan menyimpan data dari form tersebut
+        # Deteksi AJAX sederhana: header dari fetch()
+        is_ajax = (
+            request.headers.get("X-Requested-With", "").lower() in ("fetch", "xmlhttprequest")
+            or "application/json" in request.headers.get("Accept", "").lower()
+        )
+
+        if form.is_valid():
+            # Simpan user baru
             form.save()
-            # Untuk menampilkan pesan kepada pengguna setelah melakukan suatu aksi
+
+            if is_ajax:
+                # ✔️ Berhasil — balas JSON + arahkan ke halaman login
+                return JsonResponse(
+                    {"ok": True, "redirect": reverse("main:login")},
+                    status=201,  # Created
+                )
+
+            # Non-AJAX: pakai messages + redirect
             messages.success(request, "Your account has been successfully created!")
-            # Untuk melakukan redirect setelah data form berhasil disimpan
-            return redirect('main:login')
-    context = {'form': form}
-    return render(request, 'register.html', context)
+            return redirect("main:login")
+
+        # Gagal validasi form
+        if is_ajax:
+            # Format errors jadi dict[str, list[str]] supaya gampang ditampilkan di JS
+            errors = {field: [str(e) for e in errs] for field, errs in form.errors.items()}
+            # Balas 400 agar res.ok === false pada fetch()
+            return JsonResponse({"ok": False, "errors": errors}, status=400)
+
+        # Non-AJAX: render ulang halaman dengan error bawaan form
+        return render(request, "register.html", {"form": form})
+    
+    # GET — render form kosong
+    return render(request, "register.html", {"form": form})
 
 
 # Untuk mengautentikasi pengguna yang ingin login.
