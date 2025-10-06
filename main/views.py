@@ -320,8 +320,26 @@ def add_product_entry_ajax(request):
     if request.user.is_authenticated and hasattr(p, "user"):
         p.user = request.user
 
+    # Untuk kebutuhan range rating product
+    rating = request.POST.get("rating")  # ← ambil rating dari FormData
+    if rating is not None:
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            return HttpResponseBadRequest("Invalid rating")
+        if not (1 <= rating <= 5):
+            return HttpResponseBadRequest("Rating must be 1..5")
+
+    p = Product(name=name, description=description, price=price)
+    if hasattr(p, "stock"): p.stock = stock
+    if hasattr(p, "thumbnail"): p.thumbnail = thumbnail
+    if rating is not None and hasattr(p, "rating"):  # ← set rating bila ada
+        p.rating = rating
+    if request.user.is_authenticated and hasattr(p, "user"):
+        p.user = request.user
+
     p.save()
-    return JsonResponse(_pdict(p, request), status=201)  # balas item utk prepend di UI
+    return JsonResponse(_pdict(p, request), status=201)
 
 @require_POST
 def edit_product_entry_ajax(request, id):
@@ -342,9 +360,18 @@ def edit_product_entry_ajax(request, id):
         except (TypeError, ValueError): return HttpResponseBadRequest("Invalid stock")
     if "thumbnail" in request.POST and hasattr(p, "thumbnail"):
         p.thumbnail = strip_tags((request.POST.get("thumbnail") or "").strip())
+    # Untuk kebutuhan range rating product
+    if "rating" in request.POST and hasattr(p, "rating"):
+        try:
+            r = int(request.POST.get("rating"))
+        except (TypeError, ValueError):
+            return HttpResponseBadRequest("Invalid rating")
+        if not (1 <= r <= 5):
+            return HttpResponseBadRequest("Rating must be 1..5")
+        p.rating = r
 
     p.save()
-    return JsonResponse(_pdict(p, request), status=200)  # balas item utk replace di UI
+    return JsonResponse(_pdict(p, request), status=200)
 
 @require_POST
 def delete_product_ajax(request, id):

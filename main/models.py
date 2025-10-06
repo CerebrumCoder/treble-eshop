@@ -1,5 +1,8 @@
 from datetime import datetime, timezone
 import uuid
+
+# Untuk kebutuhan range rating
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 # Menghubungkan setiap objek Product dengan user yang membuatnya
@@ -46,7 +49,10 @@ class Product(models.Model):
     # Tambahan dari Neal
     product_views = models.PositiveIntegerField(default=0)
     stock = models.IntegerField(default=0)
-    rating = models.IntegerField(default=0)
+    rating = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]  # ✅ model-level guard
+    )
     brand_name = models.CharField(max_length=255)
     
     # Dari Tutorial

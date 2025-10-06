@@ -79,6 +79,10 @@
           <label class="block text-sm">Stock
             <input name="stock" type="number" min="0" required class="mt-1 w-full rounded-lg border px-3 py-2" />
           </label>
+          <label class="block text-sm">Rating (1–5)
+            <input name="rating" type="number" min="1" max="5" step="1" required
+                  class="mt-1 w-full rounded-lg border px-3 py-2" />
+          </label>
           <label class="block text-sm">Thumbnail (URL)
             <input name="thumbnail" class="mt-1 w-full rounded-lg border px-3 py-2" />
           </label>
@@ -217,6 +221,14 @@
     article.className = "group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg";
     article.dataset.id = item.id;
 
+    // Penambahan variabel tambahan dari name sampai rating
+    article.dataset.name  = item.name || '';
+    article.dataset.desc  = item.description || '';
+    article.dataset.price = String(item.price ?? '');
+    article.dataset.stock = String(item.stock ?? '');
+    article.dataset.thumb = item.thumbnail || '';
+    article.dataset.rating = String(item.rating ?? 1);
+    
     const thumbHtml = item.thumbnail
       ? `<img src="${DOMPurify.sanitize(item.thumbnail)}" alt="${DOMPurify.sanitize(item.name)}"
               class="h-full w-full object-cover object-center transition duration-300 group-hover:scale-105" />`
@@ -364,6 +376,7 @@
     f.elements.name.value = prod?.name || '';
     f.elements.price.value = prod?.price ?? '';
     f.elements.stock.value = prod?.stock ?? '';
+    f.elements.rating.value = prod?.rating ?? 1;   // Baris untuk rating
     f.elements.thumbnail.value = prod?.thumbnail || '';
     f.elements.description.value = prod?.description || '';
     document.getElementById('productModalTitle').textContent = prod ? 'Update Product' : 'Create Product';
@@ -413,13 +426,19 @@
     const id  = fd.get('id');
     const url = id ? EDIT_API(id) : CREATE_API;
 
+    // clamp + validate rating 1..5 (hindari kirim sampah)
+    const r = Number(fd.get('rating'));
+    if (!Number.isInteger(r) || r < 1 || r > 5) {
+      throw new Error("Rating harus 1–5 (bilangan bulat).");
+    }
+
     const res = await fetch(url, {
       method: 'POST',
       body: fd,                    // sudah ada csrfmiddlewaretoken dari form
       credentials: 'same-origin',  // kirim cookie session
     });
 
-    
+
     if(!res.ok){
       let msg='Gagal menyimpan';
       try{ const j=await res.json(); msg=j?.error||msg; }catch{}
@@ -497,18 +516,22 @@
   // Delegasi tombol Edit/Delete yang ada dari card
   grid.addEventListener('click', (e)=>{
     const btn = e.target.closest('[data-edit], [data-del]');
-    if (!btn) return;
+    if (!btn) {
+      return;
+    }
 
+    // Penambahan kalo edit ada ratingnya juga
     if (btn.dataset.edit){
       const card = btn.closest('[data-id]');
-
-      const name = (card.querySelector('h3 a')?.textContent ?? '').trim();
-      const desc = (card.querySelector('p.text-sm.text-gray-600')?.textContent ?? '').trim();
-      const price = Number((card.querySelector('.text-lg.font-semibold')?.textContent || '').replace(/[^\d]/g,'')) || 0;
-      const stock = Number((card.textContent.match(/Stock:\s*(\d+)/)||[])[1]||0) || 0;
-      const thumbnail = (card.querySelector('img')?.getAttribute('src') || '').trim();
-
-      openProductModal({ id: btn.dataset.edit, name, description: desc, price, stock, thumbnail });
+      openProductModal({
+        id: card.dataset.id,
+        name: card.dataset.name,
+        description: card.dataset.desc,
+        price: Number(card.dataset.price || 0),
+        stock: Number(card.dataset.stock || 0),
+        rating: Number(card.dataset.rating || 1),   // ← pakai dataset
+        thumbnail: card.dataset.thumb,
+      });
       return;
     }
 
