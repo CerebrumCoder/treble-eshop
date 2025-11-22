@@ -1,8 +1,8 @@
-from django.urls import path
+from django.urls import path, include
 from main.views import (show_main, create_product, show_product, 
                         show_xml, show_json, show_xml_by_id, show_json_by_id, 
                         register, login_user, logout_user, edit_product, delete_product,
-                        add_product_entry_ajax, edit_product_entry_ajax, delete_product_ajax,
+                        add_product_entry_ajax, edit_product_entry_ajax, delete_product_ajax, proxy_image, create_product_flutter
                         )
 
 app_name = 'main'
@@ -43,5 +43,10 @@ urlpatterns = [
     path('create-product-ajax', add_product_entry_ajax, name='add_product_entry_ajax'),
     path('edit-product-ajax/<str:id>',   edit_product_entry_ajax, name='edit_product_entry_ajax'),
     path('delete-product-ajax/<str:id>', delete_product_ajax, name='delete_product_ajax'),
+
+    # Tambahan dari Tutorial 8
+    path('auth/', include('authentication.urls')),
+    path('proxy-image/', proxy_image, name='proxy_image'),
+    path('create-flutter/', create_product_flutter, name='create_product_flutter'),
 
 ]

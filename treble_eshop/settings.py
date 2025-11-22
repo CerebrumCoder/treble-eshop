@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-88q&uff$xh9+e6siq14#d$^s!90vppran)$=*xo%hp$xxf+gv7
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "neal-guarddin-trebleeshop.pbp.cs.ui.ac.id"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "neal-guarddin-trebleeshop.pbp.cs.ui.ac.id", "10.0.2.2"]
 
 # Ngasih tahu kalo form yang ada di Django ini itu aman. Jadi, kalo ada request yang masuk ke server kita,
 # terus request itu bukan dari website kita, maka request itu akan ditolak.
@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'authentication',
+    'corsheaders',
 ]
 
 # Dengan menambahkan middleware WhiteNoise pada settings.py, Django dapat 
@@ -64,7 +66,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
 
 ROOT_URLCONF = 'treble_eshop.urls'
 

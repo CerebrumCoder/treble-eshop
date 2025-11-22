@@ -33,6 +33,11 @@ from django.contrib.auth.decorators import login_required
 import datetime
 from django.urls import reverse
 
+# Tambahan dari Tutorial 8
+import requests
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 # Potongan kode di bawah ini untuk restriksi bisa akses laman itu apabila sudah login
 @login_required(login_url='/login')
 def show_main(request):
@@ -382,3 +387,75 @@ def delete_product_ajax(request, id):
     pid = str(p.id)
     p.delete()
     return JsonResponse({"ok": True, "id": pid}, status=200)  # UI remove card by data-id
+
+
+# Tambahan dari Tutorial 8
+def proxy_image(request):
+    image_url = request.GET.get('url')
+    if not image_url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Fetch image from external source
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Return the image with proper content type
+        return HttpResponse(
+            response.content,
+            content_type=response.headers.get('Content-Type', 'image/jpeg')
+        )
+    except requests.RequestException as e:
+        return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+
+@csrf_exempt
+def create_product_flutter(request):
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "error": "Invalid JSON"}, status=400)
+
+    name = strip_tags(str(data.get("name", "")).strip())
+    description = strip_tags(str(data.get("description", "")).strip())
+    thumbnail = strip_tags(str(data.get("thumbnail", "")).strip())
+    category = strip_tags(str(data.get("category", "")).strip())
+
+    def to_int(v, default=0):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            try:
+                return int(float(v))
+            except (TypeError, ValueError):
+                return default
+
+    price = to_int(data.get("price", 0), 0)
+    stock = to_int(data.get("stock", 0), 0)
+    rating = to_int(data.get("rating", 0), 1)
+    product_views = to_int(data.get("product_views", 0))
+
+    if not name:
+        return JsonResponse({"status": "error", "error": "Name is required"}, status=400)
+    if rating < 1 or rating > 5:
+        return JsonResponse({"status": "error", "error": "Rating must be 1..5"}, status=400)
+    if price < 0 or stock < 0:
+        return JsonResponse({"status": "error", "error": "Price/stock must be non-negative"}, status=400)
+
+    new_product = Product(
+        name=name,
+        description=description,
+        thumbnail=thumbnail,
+        category=category,
+        price=price,
+        stock=stock,
+        rating=rating,
+        product_views=product_views,
+    )
+    if request.user.is_authenticated:
+        new_product.user = request.user
+
+    new_product.save()
+    return JsonResponse({"status": "success", "product": _pdict(new_product, request)}, status=201)
